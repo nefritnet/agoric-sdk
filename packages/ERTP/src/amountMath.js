@@ -8,7 +8,6 @@ import { Nat, isNat } from '@agoric/nat';
 import './types';
 import natMathHelpers from './mathHelpers/natMathHelpers';
 import setMathHelpers from './mathHelpers/setMathHelpers';
-import { makeAmountMath } from './deprecatedAmountMath';
 
 // We want an enum, but narrowed to the AmountMathKind type.
 /**
@@ -237,4 +236,4 @@ const amountMath = {
 };
 harden(amountMath);
 
-export { amountMath, MathKind, makeAmountMath };
+export { amountMath, MathKind };

@@ -10,7 +10,6 @@ import { makeNotifierKit } from '@agoric/notifier';
 import { isPromise } from '@agoric/promise-kit';
 
 import { amountMath, MathKind } from './amountMath';
-import { makeAmountMath } from './deprecatedAmountMath';
 import { makeFarName, ERTPKind } from './interfaces';
 import { coerceDisplayInfo } from './displayInfo';
 
@@ -288,7 +287,6 @@ function makeIssuerKit(
   return harden({
     mint,
     issuer,
-    amountMath: makeAmountMath(brand, amountMathKind),
     brand,
   });
 }
