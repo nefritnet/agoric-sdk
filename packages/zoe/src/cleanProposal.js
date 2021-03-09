@@ -2,6 +2,7 @@ import { assert, details as X, q } from '@agoric/assert';
 import { mustBeComparable } from '@agoric/same-structure';
 import { isNat } from '@agoric/nat';
 import { Data } from '@agoric/marshal';
+import { amountMath } from '@agoric/ertp';
 
 import '../exported';
 import './internal-types';
@@ -53,18 +54,16 @@ const cleanKeys = (allowedKeys, record) => {
 export const getKeywords = keywordRecord =>
   harden(Object.getOwnPropertyNames(keywordRecord));
 
-export const coerceAmountKeywordRecord = (
-  getAmountMath,
-  allegedAmountKeywordRecord,
-) => {
+export const coerceAmountKeywordRecord = allegedAmountKeywordRecord => {
   const keywords = getKeywords(allegedAmountKeywordRecord);
   keywords.forEach(assertKeywordName);
 
   const amounts = Object.values(allegedAmountKeywordRecord);
   // Check that each value can be coerced using the amountMath
   // indicated by brand. `AmountMath.coerce` throws if coercion fails.
+  // TODO: coercing with the amount's same brand is a bit weird. Fix this.
   const coercedAmounts = amounts.map(amount =>
-    getAmountMath(amount.brand).coerce(amount),
+    amountMath.coerce(amount, amount.brand),
   );
 
   // Recreate the amountKeywordRecord with coercedAmounts.
@@ -101,11 +100,10 @@ export const cleanKeywords = keywordRecord => {
  * `{ waived: null }` `{ onDemand: null }` `{ afterDeadline: { timer
  * :Timer, deadline :bigint } }
  *
- * @param {(brand: Brand) => DeprecatedAmountMath} getAmountMath
  * @param {Proposal} proposal
  * @returns {ProposalRecord}
  */
-export const cleanProposal = (getAmountMath, proposal) => {
+export const cleanProposal = proposal => {
   const rootKeysAllowed = ['want', 'give', 'exit'];
   mustBeComparable(proposal);
   assertKeysAllowed(rootKeysAllowed, proposal);
@@ -114,8 +112,8 @@ export const cleanProposal = (getAmountMath, proposal) => {
   let { want = Data({}), give = Data({}) } = proposal;
   const { exit = harden({ onDemand: null }) } = proposal;
 
-  want = coerceAmountKeywordRecord(getAmountMath, want);
-  give = coerceAmountKeywordRecord(getAmountMath, give);
+  want = coerceAmountKeywordRecord(want);
+  give = coerceAmountKeywordRecord(give);
 
   // Check exit
   assert(

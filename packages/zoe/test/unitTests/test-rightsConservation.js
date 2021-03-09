@@ -3,8 +3,7 @@ import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 
-import { makeWeakStore } from '@agoric/store';
-import { makeIssuerKit } from '@agoric/ertp';
+import { amountMath, makeIssuerKit } from '@agoric/ertp';
 import { assertRightsConserved } from '../../src/contractFacet/rightsConservation';
 
 const setupAmountMaths = () => {
@@ -13,24 +12,18 @@ const setupAmountMaths = () => {
   const bucksIssuerResults = makeIssuerKit('bucks');
 
   const all = [moolaIssuerResults, simoleanIssuerResults, bucksIssuerResults];
-  const amountMathArray = all.map(objs => objs.amountMath);
-  const brandToAmountMath = makeWeakStore('brand');
-  all.forEach(bundle =>
-    brandToAmountMath.init(bundle.brand, bundle.amountMath),
-  );
-  const getAmountMathForBrand = brandToAmountMath.get;
-  return {
-    amountMathArray,
-    getAmountMathForBrand,
-  };
+  const brands = all.map(record => record.brand);
+  return brands;
 };
 
-const makeAmountMatrix = (amountMathArray, valueMatrix) =>
-  valueMatrix.map(row => row.map((value, i) => amountMathArray[i].make(value)));
+const makeAmountMatrix = (brands, valueMatrix) =>
+  valueMatrix.map(row =>
+    row.map((value, i) => amountMath.make(value, brands[i])),
+  );
 
 // rights are conserved for amount with Nat values
 test(`assertRightsConserved - true for amount with nat values`, t => {
-  const { amountMathArray, getAmountMathForBrand } = setupAmountMaths();
+  const brands = setupAmountMaths();
   const previousValues = [
     [0, 1, 0],
     [4, 1, 0],
@@ -42,20 +35,15 @@ test(`assertRightsConserved - true for amount with nat values`, t => {
     [6, 2, 0],
   ];
 
-  const previousAmounts = makeAmountMatrix(
-    amountMathArray,
-    previousValues,
-  ).flat();
-  const newAmounts = makeAmountMatrix(amountMathArray, newValues).flat();
+  const previousAmounts = makeAmountMatrix(brands, previousValues).flat();
+  const newAmounts = makeAmountMatrix(brands, newValues).flat();
 
-  t.notThrows(() =>
-    assertRightsConserved(getAmountMathForBrand, previousAmounts, newAmounts),
-  );
+  t.notThrows(() => assertRightsConserved(previousAmounts, newAmounts));
 });
 
 // rights are *not* conserved for amount with Nat values
 test(`assertRightsConserved - false for amount with Nat values`, t => {
-  const { amountMathArray, getAmountMathForBrand } = setupAmountMaths();
+  const brands = setupAmountMaths();
   const oldValues = [
     [0, 1, 4],
     [4, 1, 0],
@@ -67,25 +55,22 @@ test(`assertRightsConserved - false for amount with Nat values`, t => {
     [6, 2, 0],
   ];
 
-  const oldAmounts = makeAmountMatrix(amountMathArray, oldValues).flat();
-  const newAmounts = makeAmountMatrix(amountMathArray, newValues).flat();
+  const oldAmounts = makeAmountMatrix(brands, oldValues).flat();
+  const newAmounts = makeAmountMatrix(brands, newValues).flat();
 
   console.log('ERROR EXPECTED: rights were not conserved for brand >>>');
   t.throws(
-    () => assertRightsConserved(getAmountMathForBrand, oldAmounts, newAmounts),
+    () => assertRightsConserved(oldAmounts, newAmounts),
     { message: /rights were not conserved for brand/ },
     `should throw if rights aren't conserved`,
   );
 });
 
 test(`assertRightsConserved - empty arrays`, t => {
-  const { getAmountMathForBrand } = setupAmountMaths();
   const oldAmounts = [];
   const newAmounts = [];
 
-  t.notThrows(() =>
-    assertRightsConserved(getAmountMathForBrand, oldAmounts, newAmounts),
-  );
+  t.notThrows(() => assertRightsConserved(oldAmounts, newAmounts));
 });
 
 // TODO: add tests for non-Nat values

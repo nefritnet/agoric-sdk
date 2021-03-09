@@ -2,21 +2,13 @@
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
-import { makeWeakStore } from '@agoric/store';
 import { Data } from '@agoric/marshal';
 import { cleanProposal } from '../../src/cleanProposal';
 import { setup } from './setupBasicMints';
 import buildManualTimer from '../../tools/manualTimer';
 
 test('cleanProposal test', t => {
-  const { simoleanR, moolaR, bucksR, moola, simoleans } = setup();
-
-  const brandToAmountMath = makeWeakStore('brand');
-  brandToAmountMath.init(moolaR.brand, moolaR.amountMath);
-  brandToAmountMath.init(simoleanR.brand, simoleanR.amountMath);
-  brandToAmountMath.init(bucksR.brand, bucksR.amountMath);
-
-  const getAmountMathForBrand = brandToAmountMath.get;
+  const { moola, simoleans } = setup();
 
   const proposal = harden({
     give: { Asset: simoleans(1) },
@@ -29,21 +21,12 @@ test('cleanProposal test', t => {
     exit: { onDemand: null },
   });
 
-  const actual = cleanProposal(getAmountMathForBrand, proposal);
+  const actual = cleanProposal(proposal);
 
   t.deepEqual(actual, expected);
 });
 
 test('cleanProposal - all empty', t => {
-  const { simoleanR, moolaR, bucksR } = setup();
-
-  const brandToAmountMath = makeWeakStore('brand');
-  brandToAmountMath.init(moolaR.brand, moolaR.amountMath);
-  brandToAmountMath.init(simoleanR.brand, simoleanR.amountMath);
-  brandToAmountMath.init(bucksR.brand, bucksR.amountMath);
-
-  const getAmountMathForBrand = brandToAmountMath.get;
-
   const proposal = harden({
     give: Data({}),
     want: Data({}),
@@ -57,19 +40,12 @@ test('cleanProposal - all empty', t => {
   });
 
   // cleanProposal no longer fills in empty keywords
-  t.deepEqual(cleanProposal(getAmountMathForBrand, proposal), expected);
+  t.deepEqual(cleanProposal(proposal), expected);
 });
 
 test('cleanProposal - repeated brands', t => {
   t.plan(3);
-  const { simoleanR, moolaR, bucksR, moola, simoleans } = setup();
-
-  const brandToAmountMath = makeWeakStore('brand');
-  brandToAmountMath.init(moolaR.brand, moolaR.amountMath);
-  brandToAmountMath.init(simoleanR.brand, simoleanR.amountMath);
-  brandToAmountMath.init(bucksR.brand, bucksR.amountMath);
-
-  const getAmountMathForBrand = brandToAmountMath.get;
+  const { moola, simoleans } = setup();
   const timer = buildManualTimer(console.log);
 
   const proposal = harden({
@@ -86,7 +62,7 @@ test('cleanProposal - repeated brands', t => {
     exit: { afterDeadline: { timer, deadline: 100n } },
   });
   // cleanProposal no longer fills in empty keywords
-  const actual = cleanProposal(getAmountMathForBrand, proposal);
+  const actual = cleanProposal(proposal);
   t.deepEqual(actual.want, expected.want);
   t.deepEqual(actual.give, expected.give);
   t.deepEqual(actual.exit, expected.exit);
