@@ -161,10 +161,6 @@
  *
  *   The debt at the start of the loan, in Loan brand
  *
- * @property {DeprecatedAmountMath} loanMath
- *
- *   AmountMath for the loan brand
- *
  * @property {PeriodNotifier} periodNotifier
  *
  *   The AsyncIterable to notify when a period has occurred

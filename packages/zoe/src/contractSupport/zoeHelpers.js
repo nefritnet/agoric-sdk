@@ -6,7 +6,7 @@ import { sameStructure } from '@agoric/same-structure';
 import { E } from '@agoric/eventual-send';
 import { makePromiseKit } from '@agoric/promise-kit';
 
-import { MathKind } from '@agoric/ertp';
+import { MathKind, amountMath } from '@agoric/ertp';
 import { Data } from '@agoric/marshal';
 import { satisfiesWant } from '../contractFacet/offerSafety';
 import { objectMap } from '../objArrayConversion';
@@ -45,8 +45,6 @@ const calcNewAllocations = (
   fromLosses = toGains,
 ) => {
   const subtract = (amount, amountToSubtract) => {
-    const { brand } = amount;
-    const amountMath = zcf.getAmountMath(brand);
     if (amountToSubtract !== undefined) {
       return amountMath.subtract(amount, amountToSubtract);
     }
@@ -55,8 +53,6 @@ const calcNewAllocations = (
 
   const add = (amount, amountToAdd) => {
     if (amount && amountToAdd) {
-      const { brand } = amount;
-      const amountMath = zcf.getAmountMath(brand);
       return amountMath.add(amount, amountToAdd);
     }
     return amount || amountToAdd;
@@ -119,7 +115,7 @@ export const satisfies = (zcf, seat, update) => {
   const currentAllocation = seat.getCurrentAllocation();
   const newAllocation = { ...currentAllocation, ...update };
   const proposal = seat.getProposal();
-  return satisfiesWant(zcf.getAmountMath, proposal, newAllocation);
+  return satisfiesWant(proposal, newAllocation);
 };
 
 /** @type {Trade} */
@@ -327,9 +323,8 @@ export const assertProposalShape = (seat, expected) => {
 
 /* Given a brand, assert that the issuer uses NAT amountMath. */
 export const assertUsesNatMath = (zcf, brand) => {
-  const amountMath = zcf.getAmountMath(brand);
   assert(
-    amountMath.getAmountMathKind() === MathKind.NAT,
+    zcf.getMathKind(brand) === MathKind.NAT,
     X`issuer must use NAT amountMath`,
   );
 };

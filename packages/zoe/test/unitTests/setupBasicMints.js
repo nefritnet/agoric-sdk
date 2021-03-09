@@ -1,4 +1,4 @@
-import { makeIssuerKit } from '@agoric/ertp';
+import { makeIssuerKit, amountMath } from '@agoric/ertp';
 import { makeZoe } from '../../src/zoeService/zoe';
 import fakeVatAdmin from '../../src/contractFacet/fakeVatAdmin';
 
@@ -11,15 +11,15 @@ const setup = () => {
     simoleans: simoleanBundle,
     bucks: bucksBundle,
   };
-  const amountMaths = new Map();
   const brands = new Map();
 
   for (const k of Object.getOwnPropertyNames(allBundles)) {
-    amountMaths.set(k, allBundles[k].amountMath);
     brands.set(k, allBundles[k].brand);
   }
 
   const zoe = makeZoe(fakeVatAdmin);
+
+  const makeSimpleMake = brand => value => amountMath.make(value, brand);
 
   return harden({
     moolaIssuer: moolaBundle.issuer,
@@ -34,11 +34,10 @@ const setup = () => {
     bucksMint: bucksBundle.mint,
     bucksR: bucksBundle,
     bucksKit: bucksBundle,
-    amountMaths,
     brands,
-    moola: moolaBundle.amountMath.make,
-    simoleans: simoleanBundle.amountMath.make,
-    bucks: bucksBundle.amountMath.make,
+    moola: makeSimpleMake(moolaBundle.brand),
+    simoleans: makeSimpleMake(simoleanBundle.brand),
+    bucks: makeSimpleMake(bucksBundle.brand),
     zoe,
   });
 };

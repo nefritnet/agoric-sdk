@@ -142,20 +142,6 @@ test(`zcf.getIssuerForBrand - from issuerKeywordRecord & zcf.saveIssuer`, async 
   t.is(zcf.getIssuerForBrand(bucksKit.brand), bucksKit.issuer);
 });
 
-test(`zcf.getAmountMath - from issuerKeywordRecord & zcf.saveIssuer`, async t => {
-  const { moolaKit, simoleanKit, bucksKit } = setup();
-  const issuerKeywordRecord = { A: moolaKit.issuer, B: simoleanKit.issuer };
-  const { zcf } = await setupZCFTest(issuerKeywordRecord);
-  compareAmountMath(t, zcf.getAmountMath(moolaKit.brand), moolaKit.amountMath);
-  compareAmountMath(
-    t,
-    zcf.getAmountMath(simoleanKit.brand),
-    simoleanKit.amountMath,
-  );
-  await zcf.saveIssuer(bucksKit.issuer, 'C');
-  compareAmountMath(t, zcf.getAmountMath(bucksKit.brand), bucksKit.amountMath);
-});
-
 test(`zcf.assertUniqueKeyword`, async t => {
   const { moolaKit, simoleanKit } = setup();
   const issuerKeywordRecord = { A: moolaKit.issuer, B: simoleanKit.issuer };

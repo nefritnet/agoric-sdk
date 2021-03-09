@@ -31,14 +31,12 @@
 /**
  * @callback MakePercent
  * @param {bigint} value
- * @param {DeprecatedAmountMath} amountMath
  * @param {bigint=} base
  * @returns {Percent}
  */
 
 /**
  * @callback MakeCanonicalPercent
- * @param {DeprecatedAmountMath} amountMath
  * @returns {Percent}
  */
 
@@ -46,7 +44,6 @@
  * @callback CalculatePercent
  * @param {Amount} numerator
  * @param {Amount} denominator
- * @param {DeprecatedAmountMath} amountMath
  * @param {bigint=} base
  * @returns {Percent}
  */
@@ -78,8 +75,6 @@
  * Otherwise return longShare and shortShare representing ratios between 0% and
  * 100% reflecting the position of the price in the range from strikePrice1 to
  * strikePrice2.
- * @param {DeprecatedAmountMath} strikeMath
- * @param {DeprecatedAmountMath} collateralMath
  * @param {Amount} price
  * @param {Amount} strikePrice1
  * @param {Amount} strikePrice2

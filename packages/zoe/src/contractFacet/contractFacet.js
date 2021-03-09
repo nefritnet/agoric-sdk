@@ -12,7 +12,7 @@ import { E } from '@agoric/eventual-send';
 import { makeStore, makeWeakStore } from '@agoric/store';
 import { Far, Data } from '@agoric/marshal';
 
-import { makeAmountMath, MathKind } from '@agoric/ertp';
+import { MathKind } from '@agoric/ertp';
 import { makeNotifierKit, observeNotifier } from '@agoric/notifier';
 import { makePromiseKit } from '@agoric/promise-kit';
 import { assertRightsConserved } from './rightsConservation';
@@ -42,7 +42,6 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
   ) => {
     /** @type {IssuerTable} */
     const issuerTable = makeIssuerTable();
-    const getAmountMath = brand => issuerTable.getByBrand(brand).amountMath;
 
     /** @type {WeakStore<InvitationHandle, (seat: ZCFSeat) => unknown>} */
     const invitationHandleToHandler = makeWeakStore('invitationHandle');
@@ -71,10 +70,6 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
           brands: {
             ...instanceRecord.terms.brands,
             [keyword]: issuerRecord.brand,
-          },
-          maths: {
-            ...instanceRecord.terms.maths,
-            [keyword]: issuerRecord.amountMath,
           },
         },
       };
@@ -149,7 +144,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
 
     const makeEmptySeatKit = (exit = undefined) => {
       const initialAllocation = Data({});
-      const proposal = cleanProposal(getAmountMath, harden({ exit }));
+      const proposal = cleanProposal(harden({ exit }));
       const { notifier, updater } = makeNotifierKit();
       /** @type {PromiseRecord<ZoeSeatAdmin>} */
       const zoeSeatAdminPromiseKit = makePromiseKit();
@@ -171,7 +166,6 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
         allSeatStagings,
         zoeSeatAdminPromiseKit.promise,
         seatData,
-        getAmountMath,
       );
       zcfSeatToZCFSeatAdmin.init(zcfSeat, zcfSeatAdmin);
       zcfSeatToSeatHandle.init(zcfSeat, seatHandle);
@@ -213,11 +207,9 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
         zoeMintP,
       ).getIssuerRecord();
       // AWAIT
-      const mintyAmountMath = makeAmountMath(mintyBrand, amountMathKind);
       const mintyIssuerRecord = harden({
         brand: mintyBrand,
         issuer: mintyIssuer,
-        amountMath: mintyAmountMath,
       });
       registerIssuerRecordWithKeyword(keyword, mintyIssuerRecord);
       issuerTable.initIssuerByRecord(mintyIssuerRecord);
@@ -343,7 +335,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
         );
         const newAmounts = flattenAllocations(newAllocations);
 
-        assertRightsConserved(getAmountMath, previousAmounts, newAmounts);
+        assertRightsConserved(previousAmounts, newAmounts);
 
         reallocateInternal(seatStagings);
       },
@@ -408,7 +400,6 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
       getTerms: () => instanceRecord.terms,
       getBrandForIssuer: issuer => issuerTable.getByIssuer(issuer).brand,
       getIssuerForBrand: brand => issuerTable.getByBrand(brand).issuer,
-      getAmountMath,
       /**
        * Provide a jig object for testing purposes only.
        *
@@ -442,7 +433,6 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
           allSeatStagings,
           zoeSeatAdmin,
           seatData,
-          getAmountMath,
         );
         zcfSeatToZCFSeatAdmin.init(zcfSeat, zcfSeatAdmin);
         zcfSeatToSeatHandle.init(zcfSeat, seatHandle);

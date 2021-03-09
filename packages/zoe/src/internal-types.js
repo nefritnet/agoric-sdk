@@ -48,7 +48,6 @@
  * - a presence from Zoe such that ZCF can tell Zoe
  * about seat events
  * @param {SeatData} seatData - pass-by-copy data to use to make the seat
- * @param {GetAmountMath} getAmountMath
  * @returns {ZcfSeatAdminKit}
  */
 

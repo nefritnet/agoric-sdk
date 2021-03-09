@@ -9,7 +9,7 @@ import { makePromiseKit } from '@agoric/promise-kit';
  */
 import '@agoric/ertp/exported';
 import '@agoric/store/exported';
-import { makeIssuerKit, MathKind } from '@agoric/ertp';
+import { makeIssuerKit, MathKind, amountMath } from '@agoric/ertp';
 
 import '../../exported';
 import '../internal-types';
@@ -40,9 +40,6 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
 
   /** @type {WeakStore<Instance,InstanceAdmin>} */
   const instanceToInstanceAdmin = makeWeakStore('instance');
-
-  /** @type {GetAmountMath} */
-  const getAmountMath = brand => issuerTable.getByBrand(brand).amountMath;
 
   /** @type {WeakStore<Brand, ERef<Purse>>} */
   const brandToPurse = makeWeakStore('brand');
@@ -135,10 +132,6 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
         issuerRecords.map(record => record.brand),
         keywords,
       );
-      const maths = arrayToObj(
-        issuerRecords.map(record => record.amountMath),
-        keywords,
-      );
 
       let instanceRecord = {
         installation,
@@ -146,7 +139,6 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
           ...customTerms,
           issuers,
           brands,
-          maths,
         },
       };
 
@@ -189,13 +181,11 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
         const {
           mint: localMint,
           issuer: localIssuer,
-          amountMath: localAmountMath,
           brand: localBrand,
         } = makeIssuerKit(keyword, amountMathKind, displayInfo);
         const localIssuerRecord = harden({
           brand: localBrand,
           issuer: localIssuer,
-          amountMath: localAmountMath,
         });
         issuerTable.initIssuerByRecord(localIssuerRecord);
         registerIssuerByKeyword(keyword, localIssuerRecord);
@@ -284,14 +274,14 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
       const {
         issuer: invitationIssuer,
         mint: invitationMint,
-        amountMath: invitationAmountMath,
+        brand: invitationBrand,
       } = invitationKit;
 
       /** @type {ZoeInstanceAdmin} */
       const zoeInstanceAdminForZcf = Far('zoeInstanceAdminForZcf', {
         makeInvitation: (invitationHandle, description, customProperties) => {
-          const invitationAmount = invitationAmountMath.make(
-            harden([
+          const invitationAmount = amountMath.make(
+            [
               {
                 ...customProperties,
                 description,
@@ -299,7 +289,8 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
                 instance,
                 installation,
               },
-            ]),
+            ],
+            invitationBrand,
           );
           return invitationMint.mintPayment(invitationAmount);
         },
@@ -413,7 +404,7 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
             `No further offers are accepted`,
           );
 
-          const proposal = cleanProposal(getAmountMath, uncleanProposal);
+          const proposal = cleanProposal(uncleanProposal);
           const { give, want } = proposal;
           const giveKeywords = Object.keys(give);
           const wantKeywords = Object.keys(want);
@@ -431,7 +422,8 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
               // eslint-disable-next-line no-else-return
             } else {
               // payments outside the give: clause are ignored.
-              return getAmountMath(proposal.want[keyword].brand).getEmpty();
+              //  TODO: figure out how to get mathKind here
+              return amountMath.makeEmpty(proposal.want[keyword].brand);
             }
           });
 

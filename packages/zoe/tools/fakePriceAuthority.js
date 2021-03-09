@@ -15,8 +15,6 @@ import '../exported';
 
 /**
  * @typedef {Object} FakePriceAuthorityOptions
- * @property {DeprecatedAmountMath} mathIn
- * @property {DeprecatedAmountMath} mathOut
  * @property {Array<number>} [priceList]
  * @property {Array<[number, number]>} [tradeList]
  * @property {ERef<TimerService>} timer

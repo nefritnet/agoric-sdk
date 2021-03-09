@@ -2,6 +2,7 @@
 
 import { Far } from '@agoric/marshal';
 import { assert } from '@agoric/assert';
+import { amountMath } from '@agoric/ertp';
 
 // Eventually will be importable from '@agoric/zoe-contract-support'
 import {
@@ -63,7 +64,7 @@ const start = async zcf => {
 
   const {
     issuer: liquidityIssuer,
-    amountMath: liquidityMath,
+    brand: liquidityBrand,
   } = liquidityMint.getIssuerRecord();
   let liqTokenSupply = 0n;
 
@@ -149,8 +150,7 @@ const start = async zcf => {
       getPoolAmount(amountIn.brand).value,
       getPoolAmount(wantedAmountOut.brand).value,
     );
-    const outAmountMath = zcf.getAmountMath(wantedAmountOut.brand);
-    const tradeAmountOut = outAmountMath.make(outputValue);
+    const tradeAmountOut = amountMath.make(outputValue, wantedAmountOut.brand);
     return consummate(amountIn, tradeAmountOut, swapSeat);
   };
 
@@ -179,8 +179,7 @@ const start = async zcf => {
       getPoolAmount(wantedAmountOut.brand).value,
     );
     assert(tradePrice <= amountIn.value, 'amountIn insufficient');
-    const inAmountMath = zcf.getAmountMath(amountIn.brand);
-    const tradeAmountIn = inAmountMath.make(tradePrice);
+    const tradeAmountIn = amountMath.make(tradePrice, amountIn.brand);
 
     return consummate(tradeAmountIn, wantedAmountOut, swapSeat);
   };
@@ -194,7 +193,10 @@ const start = async zcf => {
       centralIn,
       centralPool,
     );
-    const liquidityAmountOut = liquidityMath.make(liquidityValueOut);
+    const liquidityAmountOut = amountMath.make(
+      liquidityValueOut,
+      liquidityBrand,
+    );
     liquidityMint.mintGains({ Liquidity: liquidityAmountOut }, poolSeat);
     liqTokenSupply += liquidityValueOut;
 
@@ -338,7 +340,7 @@ const start = async zcf => {
       inputReserve,
       outputReserve,
     );
-    return zcf.getAmountMath(brandOut).make(outputValue);
+    return amountMath.make(outputValue, brandOut);
   };
 
   /**
@@ -356,7 +358,7 @@ const start = async zcf => {
       inputReserve,
       outputReserve,
     );
-    return zcf.getAmountMath(brandIn).make(outputValue);
+    return amountMath.make(outputValue, brandIn);
   };
 
   const getPoolAllocation = poolSeat.getCurrentAllocation;

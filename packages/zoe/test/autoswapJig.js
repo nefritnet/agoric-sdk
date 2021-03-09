@@ -1,6 +1,5 @@
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
-import { makeLocalAmountMath } from '@agoric/ertp';
 import { natSafeMath } from '../src/contractSupport';
 
 import { assertOfferResult, assertPayoutAmount } from './zoeTestHelpers';

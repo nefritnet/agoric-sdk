@@ -35,7 +35,6 @@
  * @property {() => Terms} getTerms
  * @property {(issuer: Issuer) => Brand} getBrandForIssuer
  * @property {(brand: Brand) => Issuer} getIssuerForBrand
- * @property {GetAmountMath} getAmountMath
  * @property {MakeZCFMint} makeZCFMint
  * @property {(exit: ExitRule=) => ZcfSeatKit} makeEmptySeatKit
  * @property {SetTestJig} setTestJig
@@ -97,12 +96,6 @@
  * @param {string} description
  * @param {Object=} customProperties
  * @returns {Promise<Invitation>}
- */
-
-/**
- * @callback GetAmountMath
- * @param {Brand} brand
- * @returns {DeprecatedAmountMath}
  */
 
 /**
