@@ -112,7 +112,6 @@ export const makeBorrowInvitation = (zcf, config) => {
     const debtCalculatorConfig = {
       calcInterestFn: calculateInterest,
       originalDebt: loanWanted,
-      loanMath,
       periodNotifier,
       interestRate,
       interestPeriod,

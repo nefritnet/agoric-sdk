@@ -8,7 +8,7 @@ import bundleSource from '@agoric/bundle-source';
 
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
-import { makeIssuerKit, MathKind } from '@agoric/ertp';
+import { makeIssuerKit, MathKind, amountMath } from '@agoric/ertp';
 import { makePromiseKit } from '@agoric/promise-kit';
 
 import { assert } from '@agoric/assert';
@@ -72,7 +72,7 @@ test.before(
           valueOut += increment;
           return harden({
             reply: `${valueOut}`,
-            requiredFee: link.amountMath.getEmpty(),
+            requiredFee: amountMath.makeEmpty(link.brand),
           });
         },
         onError(query, reason) {
@@ -125,8 +125,7 @@ test('median aggregator', /** @param {ExecutionContext} t */ async t => {
     timer: oracleTimer,
     brands: { In: brandIn, Out: brandOut },
     issuers: { Quote: quoteIssuer },
-    maths: { In: mathIn, Out: mathOut, Quote: quoteMath },
-    unitAmountIn = mathIn.make(1n),
+    unitAmountIn = amountMath.make(1n, brandIn),
   } = await E(zoe).getTerms(aggregator.instance);
 
   const price1000 = await makeFakePriceOracle(t, 1000n);
@@ -149,9 +148,9 @@ test('median aggregator', /** @param {ExecutionContext} t */ async t => {
 
     const q = await E(quoteIssuer).getAmountOf(lastRec.value.quotePayment);
     t.deepEqual(q, lastRec.value.quoteAmount);
-    const [{ timestamp, timer, amountIn, amountOut }] = quoteMath.getValue(q);
+    const [{ timestamp, timer, amountIn, amountOut }] = q.value;
     t.is(timer, oracleTimer);
-    const valueOut = mathOut.getValue(amountOut);
+    const valueOut = amountMath.getValue(amountOut, brandOut);
 
     t.deepEqual(amountIn, unitAmountIn);
 
@@ -168,7 +167,7 @@ test('median aggregator', /** @param {ExecutionContext} t */ async t => {
         amountIn: rgIn,
         amountOut: rgOut,
       },
-    ] = quoteMath.getValue(recentGQ);
+    ] = recentGQ.value;
     t.is(rgTimer, oracleTimer);
     t.is(rgTimestamp, timestamp);
     t.deepEqual(rgIn, amountIn);
@@ -183,7 +182,7 @@ test('median aggregator', /** @param {ExecutionContext} t */ async t => {
         amountIn: rwIn,
         amountOut: rwOut,
       },
-    ] = quoteMath.getValue(recentWQ);
+    ] = recentWQ.value;
     t.is(rwTimer, oracleTimer);
     t.is(rwTimestamp, timestamp);
     t.deepEqual(rwIn, amountIn);

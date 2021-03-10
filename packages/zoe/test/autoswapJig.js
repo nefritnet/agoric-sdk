@@ -1,7 +1,8 @@
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
-import { natSafeMath } from '../src/contractSupport';
+import { amountMath } from '@agoric/ertp';
 
+import { natSafeMath } from '../src/contractSupport';
 import { assertOfferResult, assertPayoutAmount } from './zoeTestHelpers';
 
 const { add, subtract, multiply, floorDivide } = natSafeMath;
@@ -143,8 +144,6 @@ export const makeTrader = async (purses, zoe, publicFacet, centralIssuer) => {
       expected,
       { Secondary: secondaryIssuer },
     ) => {
-      const { make: central } = await makeLocalAmountMath(centralIssuer);
-      const { make: secondary } = await makeLocalAmountMath(secondaryIssuer);
       // just check that the trade went through, and the results are as stated.
       // The test will declare fees, refunds, and figure out when the trade
       // gets less than requested
@@ -160,6 +159,11 @@ export const makeTrader = async (purses, zoe, publicFacet, centralIssuer) => {
         in: inExpected,
         out: outExpected,
       } = expected;
+
+      const centralBrand = await E(centralIssuer).getBrand();
+      const secondaryBrand = await E(secondaryIssuer).getBrand();
+      const central = value => amountMath.make(value, centralBrand);
+      const secondary = value => amountMath.make(value, secondaryBrand);
 
       const poolPre = await getPoolAllocation(secondaryIssuer);
       t.deepEqual(poolPre.Central, central(cPoolPre), `central before swap`);
@@ -198,12 +202,17 @@ export const makeTrader = async (purses, zoe, publicFacet, centralIssuer) => {
       expected,
       { Liquidity: liquidityIssuer, Secondary: secondaryIssuer },
     ) => {
-      const { make: central } = await makeLocalAmountMath(centralIssuer);
-      const { make: secondary } = await makeLocalAmountMath(secondaryIssuer);
-      const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
       // just check that it went through, and the results are as stated.
       // The test will declare fees, refunds, and figure out when the trade
       // gets less than requested
+
+      const centralBrand = await E(centralIssuer).getBrand();
+      const secondaryBrand = await E(secondaryIssuer).getBrand();
+      const liquidityBrand = await E(liquidityIssuer).getBrand();
+      const central = value => amountMath.make(value, centralBrand);
+      const secondary = value => amountMath.make(value, secondaryBrand);
+      const liquidity = value => amountMath.make(value, liquidityBrand);
+
       const { c: cPre, s: sPre, l: lPre, k: kPre } = priorPoolState;
       const { cAmount, sAmount, lAmount = liquidity(0) } = details;
       const {
@@ -280,9 +289,13 @@ export const makeTrader = async (purses, zoe, publicFacet, centralIssuer) => {
       expected,
       { Liquidity: liquidityIssuer, Secondary: secondaryIssuer },
     ) => {
-      const { make: central } = await makeLocalAmountMath(centralIssuer);
-      const { make: secondary } = await makeLocalAmountMath(secondaryIssuer);
-      const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
+      const centralBrand = await E(centralIssuer).getBrand();
+      const secondaryBrand = await E(secondaryIssuer).getBrand();
+      const liquidityBrand = await E(liquidityIssuer).getBrand();
+      const central = value => amountMath.make(value, centralBrand);
+      const secondary = value => amountMath.make(value, secondaryBrand);
+      const liquidity = value => amountMath.make(value, liquidityBrand);
+
       const { c: cPre, s: sPre, l: lPre, k: kPre } = priorPoolState;
       const { cAmount, sAmount, lAmount = liquidity(0) } = details;
       const {
@@ -343,13 +356,17 @@ export const makeTrader = async (purses, zoe, publicFacet, centralIssuer) => {
       expected,
       { Liquidity: liquidityIssuer, Secondary: secondaryIssuer },
     ) => {
-      const { make: central } = await makeLocalAmountMath(centralIssuer);
-      const { make: secondary } = await makeLocalAmountMath(secondaryIssuer);
-      const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
-
       // just check that it went through, and the results are as stated.
       // The test will declare fees, refunds, and figure out when the trade
       // gets less than requested
+
+      const centralBrand = await E(centralIssuer).getBrand();
+      const secondaryBrand = await E(secondaryIssuer).getBrand();
+      const liquidityBrand = await E(liquidityIssuer).getBrand();
+      const central = value => amountMath.make(value, centralBrand);
+      const secondary = value => amountMath.make(value, secondaryBrand);
+      const liquidity = value => amountMath.make(value, liquidityBrand);
+
       const { c: cPre, s: sPre, l: lPre, k: kPre } = priorPoolState;
       const { cAmount, sAmount, lAmount = liquidity(0) } = details;
       const {

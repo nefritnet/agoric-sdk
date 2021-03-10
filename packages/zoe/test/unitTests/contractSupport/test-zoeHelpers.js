@@ -30,8 +30,6 @@ function makeMockTradingZcfBuilder() {
   return Far('mockTradingZcfBuilder', {
     addOffer: (keyword, offer) => offers.init(keyword, offer),
     addAllocation: (keyword, alloc) => allocs.init(keyword, alloc),
-    addBrand: issuerRecord =>
-      amountMathToBrand.init(issuerRecord.brand, issuerRecord.amountMath),
     build: () =>
       Far('mockZCF', {
         getAmountMath: amountMath => amountMathToBrand.get(amountMath),

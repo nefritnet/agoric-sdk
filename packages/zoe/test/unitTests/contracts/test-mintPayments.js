@@ -5,9 +5,8 @@ import '@agoric/install-ses';
 import test from 'ava';
 
 import bundleSource from '@agoric/bundle-source';
-
 import { E } from '@agoric/eventual-send';
-import { makeIssuerKit, makeLocalAmountMath } from '@agoric/ertp';
+import { makeIssuerKit, amountMath } from '@agoric/ertp';
 import fakeVatAdmin from '../../../src/contractFacet/fakeVatAdmin';
 
 // noinspection ES6PreferShortImport
@@ -61,9 +60,9 @@ test('zoe - mint payments', async t => {
         // what we get as our payout
         const publicFacet = await E(zoe).getPublicFacet(instance);
         const tokenIssuer = await E(publicFacet).getTokenIssuer();
-        const amountMath = await makeLocalAmountMath(tokenIssuer);
+        const tokenBrand = await E(tokenIssuer).getBrand();
 
-        const tokens1000 = await E(amountMath).make(1000);
+        const tokens1000 = await amountMath.make(1000n, tokenBrand);
         const tokenPayoutAmount = await E(tokenIssuer).getAmountOf(paymentP);
 
         // Bob got 1000 tokens
@@ -131,8 +130,8 @@ test('zoe - mint payments with unrelated give and want', async t => {
         const { instance } = invitationValue;
 
         const proposal = harden({
-          give: { Asset: moolaKit.amountMath.make(10) },
-          want: { Price: simoleanKit.amountMath.make(100) },
+          give: { Asset: amountMath.make(10n, moolaKit.brand) },
+          want: { Price: amountMath.make(100n, simoleanKit.brand) },
         });
         const paymentKeywordRecord = harden({
           Asset: moolaPayment,
@@ -150,9 +149,9 @@ test('zoe - mint payments with unrelated give and want', async t => {
         // what we get as our payout
         const publicFacet = await E(zoe).getPublicFacet(instance);
         const tokenIssuer = await E(publicFacet).getTokenIssuer();
-        const amountMath = await makeLocalAmountMath(tokenIssuer);
+        const tokenBrand = await E(tokenIssuer).getBrand();
 
-        const tokens1000 = await E(amountMath).make(1000);
+        const tokens1000 = await amountMath.make(1000n, tokenBrand);
         const tokenPayoutAmount = await E(tokenIssuer).getAmountOf(
           tokenPaymentP,
         );
@@ -163,7 +162,7 @@ test('zoe - mint payments with unrelated give and want', async t => {
         // Got refunded all the moola given
         t.deepEqual(
           await E(moolaKit.issuer).getAmountOf(moolaRefundP),
-          moolaKit.amountMath.make(10),
+          amountMath.make(10n, moolaKit.brand),
         );
       },
     };
@@ -178,7 +177,7 @@ test('zoe - mint payments with unrelated give and want', async t => {
   // Setup Bob
   const bob = makeBob(
     installation,
-    moolaKit.mint.mintPayment(moolaKit.amountMath.make(10)),
+    moolaKit.mint.mintPayment(amountMath.make(10n, moolaKit.brand)),
   );
   await bob.offer(invitation);
 });

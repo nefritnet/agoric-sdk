@@ -2,7 +2,8 @@ import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
 import { assert, details as X } from '@agoric/assert';
 import { sameStructure } from '@agoric/same-structure';
-import { makeLocalAmountMath } from '@agoric/ertp';
+import { amountMath } from '@agoric/ertp';
+
 import { showPurseBalance, setupIssuers } from '../helpers';
 
 const build = async (log, zoe, issuers, payments, installations, timer) => {
@@ -506,7 +507,7 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
       const publicFacet = await E(zoe).getPublicFacet(instance);
       const terms = await E(zoe).getTerms(instance);
       const ticketIssuer = await E(publicFacet).getItemsIssuer();
-      const ticketAmountMath = await makeLocalAmountMath(ticketIssuer);
+      const ticketBrand = await E(ticketIssuer).getBrand();
 
       const availableTickets = await E(publicFacet).getAvailableItems();
       log('availableTickets: ', availableTickets);
@@ -515,7 +516,7 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
         ticket => ticket.number === 1,
       );
       // make the corresponding amount
-      const ticket1Amount = ticketAmountMath.make(harden([ticket1Value]));
+      const ticket1Amount = amountMath.make([ticket1Value], ticketBrand);
       const proposal = harden({
         give: { Money: terms.pricePerItem },
         want: { Items: ticket1Amount },

@@ -7,6 +7,8 @@ import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 
+import { amountMath } from '@agoric/ertp';
+
 import { makeAddCollateralInvitation } from '../../../../src/contracts/loan/addCollateral';
 import { makeFakePriceAuthority } from '../../../../tools/fakePriceAuthority';
 import buildManualTimer from '../../../../tools/manualTimer';
@@ -23,7 +25,7 @@ test.todo('makeAddCollateralInvitation - test bad proposal');
 test('makeAddCollateralInvitation', async t => {
   const { zcf, zoe, collateralKit, loanKit } = await setupLoanUnitTest();
 
-  const collateral = collateralKit.amountMath.make(10);
+  const collateral = amountMath.make(10n, collateralKit.brand);
 
   // Set up the collateral seat
   const { zcfSeat: collateralSeat } = await makeSeatKit(
@@ -39,14 +41,12 @@ test('makeAddCollateralInvitation', async t => {
   const timer = buildManualTimer(console.log);
 
   const priceAuthority = makeFakePriceAuthority({
-    mathIn: collateralKit.amountMath,
-    mathOut: loanKit.amountMath,
     priceList: [],
     timer,
   });
 
   const autoswapInstance = {};
-  const getDebt = () => loanKit.amountMath.make(100);
+  const getDebt = () => amountMath.make(100n, loanKit.brand);
 
   const config = {
     collateralSeat,
@@ -58,7 +58,7 @@ test('makeAddCollateralInvitation', async t => {
   };
   const addCollateralInvitation = makeAddCollateralInvitation(zcf, config);
 
-  const addedAmount = collateralKit.amountMath.make(3);
+  const addedAmount = amountMath.make(3n, collateralKit.brand);
 
   await performAddCollateral(
     t,
@@ -72,6 +72,6 @@ test('makeAddCollateralInvitation', async t => {
   // Ensure the collSeat gets the added collateral
 
   t.deepEqual(collateralSeat.getCurrentAllocation(), {
-    Collateral: collateralKit.amountMath.add(collateral, addedAmount),
+    Collateral: amountMath.add(collateral, addedAmount),
   });
 });

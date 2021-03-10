@@ -1,5 +1,5 @@
 import { E } from '@agoric/eventual-send';
-import { makeLocalAmountMath } from '@agoric/ertp';
+import { amountMath } from '@agoric/ertp';
 
 export const showPurseBalance = async (purseP, name, log) => {
   try {
@@ -10,18 +10,15 @@ export const showPurseBalance = async (purseP, name, log) => {
   }
 };
 
-export const setupIssuers = async (zoe, issuers) => {
+export const setupIssuers = async (zoe, issuers, brands) => {
   const purses = issuers.map(issuer => E(issuer).makeEmptyPurse());
   const invitationIssuer = await E(zoe).getInvitationIssuer();
   const [moolaIssuer, simoleanIssuer, bucksIssuer] = issuers;
+  const [moolaBrand, simoleanBrand, bucksBrand] = brands;
 
-  const moolaAmountMath = await makeLocalAmountMath(moolaIssuer);
-  const simoleanAmountMath = await makeLocalAmountMath(simoleanIssuer);
-  const bucksAmountMath = await makeLocalAmountMath(bucksIssuer);
-
-  const moola = moolaAmountMath.make;
-  const simoleans = simoleanAmountMath.make;
-  const bucks = bucksAmountMath.make;
+  const moola = value => amountMath.make(value, moolaBrand);
+  const simoleans = value => amountMath.make(value, simoleanBrand);
+  const bucks = value => amountMath.make(value, bucksBrand);
 
   return harden({
     issuers: harden([moolaIssuer, simoleanIssuer]),
@@ -29,9 +26,6 @@ export const setupIssuers = async (zoe, issuers) => {
     moolaIssuer,
     simoleanIssuer,
     bucksIssuer,
-    moolaAmountMath,
-    simoleanAmountMath,
-    bucksAmountMath,
     moola,
     simoleans,
     bucks,

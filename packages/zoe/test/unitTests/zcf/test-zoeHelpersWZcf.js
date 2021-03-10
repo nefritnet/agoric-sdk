@@ -152,7 +152,7 @@ test(`zcf saveAllIssuers - multiple`, async t => {
   const { issuer: dIssuer, brand: dBrand } = makeIssuerKit('doubloons');
   const { issuer: pIssuer, brand: pBrand } = makeIssuerKit(
     'pieces of eight',
-    MathKind.STRING_SET,
+    MathKind.SET,
   );
 
   await saveAllIssuers(zcf, { G: gIssuer, D: dIssuer, P: pIssuer });
@@ -184,7 +184,7 @@ test(`zcf saveAllIssuers - duplicate keyword`, async t => {
 
   const { issuer: pIssuer, brand: pBrand } = makeIssuerKit(
     'pieces of eight',
-    MathKind.STRING_SET,
+    MathKind.SET,
   );
 
   await t.notThrowsAsync(

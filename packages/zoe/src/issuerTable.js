@@ -65,6 +65,7 @@ const makeIssuerTable = () => {
       issuerTable.initIssuerByRecord({
         brand,
         issuer,
+        mathKind: amountMathKind,
         displayInfo: { ...displayInfo, amountMathKind },
       });
       return issuerTable.getByBrand(brand);

@@ -80,6 +80,14 @@ const getHelpersFromValue = value => {
   return natMathHelpers;
 };
 
+/** @type {(amount: Amount) => AmountMathKind} */
+const getMathKind = amount => {
+  if (Array.isArray(amount.value)) {
+    return 'set';
+  }
+  return 'nat';
+};
+
 /** @type {(amount: Amount ) => NatMathHelpers | SetMathHelpers} */
 const getHelpersFromAmount = amount => {
   // @ts-ignore
@@ -192,7 +200,7 @@ const amountMath = {
     return amountMath.make(allegedAmount.value, brand);
   },
   getValue: (amount, brand) => amountMath.coerce(amount, brand).value,
-  makeEmpty: (mathKind, brand) => {
+  makeEmpty: (brand, mathKind = MathKind.NAT) => {
     assert(
       helpers[mathKind],
       X`${mathKind} must be MathKind.NAT or MathKind.SET. MathKind.STRING_SET is accepted but deprecated`,
@@ -200,6 +208,8 @@ const amountMath = {
     assertLooksLikeBrand(brand);
     return noCoerceMake(helpers[mathKind].doMakeEmpty(), brand);
   },
+  makeEmptyFromAmount: amount =>
+    amountMath.makeEmpty(amount.brand, getMathKind(amount)),
   isEmpty: (amount, brand = undefined) => {
     assertLooksLikeAmount(amount);
     optionalBrandCheck(amount, brand);
@@ -236,4 +246,4 @@ const amountMath = {
 };
 harden(amountMath);
 
-export { amountMath, MathKind };
+export { amountMath, MathKind, getMathKind };

@@ -162,10 +162,6 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
               ...instanceRecord.terms.brands,
               [keyword]: issuerRecord.brand,
             },
-            maths: {
-              ...instanceRecord.terms.maths,
-              [keyword]: issuerRecord.amountMath,
-            },
           },
         };
       };
@@ -186,6 +182,7 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
         const localIssuerRecord = harden({
           brand: localBrand,
           issuer: localIssuer,
+          mathKind: amountMathKind,
         });
         issuerTable.initIssuerByRecord(localIssuerRecord);
         registerIssuerByKeyword(keyword, localIssuerRecord);
@@ -422,8 +419,7 @@ function makeZoe(vatAdminSvc, zcfBundleName = undefined) {
               // eslint-disable-next-line no-else-return
             } else {
               // payments outside the give: clause are ignored.
-              //  TODO: figure out how to get mathKind here
-              return amountMath.makeEmpty(proposal.want[keyword].brand);
+              return amountMath.makeEmptyFromAmount(proposal.want[keyword]);
             }
           });
 

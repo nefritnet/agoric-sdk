@@ -4,7 +4,7 @@ import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 import { E } from '@agoric/eventual-send';
-import { makeLocalAmountMath } from '@agoric/ertp';
+import { amountMath } from '@agoric/ertp';
 import {
   makeTrader,
   outputFromInputPrice,
@@ -55,8 +55,8 @@ test('autoSwap API interactions, no jig', async t => {
   /** @type {AutoswapPublicFacet} */
   const publicFacet = startRecord.publicFacet;
   const liquidityIssuerP = await E(publicFacet).getLiquidityIssuer();
-  const liquidityAmountMath = await makeLocalAmountMath(liquidityIssuerP);
-  const liquidity = liquidityAmountMath.make;
+  const liquidityBrand = await E(liquidityIssuerP).getBrand();
+  const liquidity = value => amountMath.make(value, liquidityBrand);
 
   // Alice adds liquidity
   // 10 moola = 5 simoleans at the time of the liquidity adding
@@ -238,7 +238,6 @@ test('autoSwap - thorough jig test init, add, swap', async t => {
   /** @type {AutoswapPublicFacet} */
   const publicFacet = startRecord.publicFacet;
   const liquidityIssuer = await E(publicFacet).getLiquidityIssuer();
-  const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
   let poolState = {
     c: 0n,
     s: 0n,
@@ -251,6 +250,10 @@ test('autoSwap - thorough jig test init, add, swap', async t => {
   moolaPurse.deposit(moolaMint.mintPayment(moola(50000)));
   const simoleanPurse = simoleanIssuer.makeEmptyPurse();
   simoleanPurse.deposit(simoleanMint.mintPayment(simoleans(50000)));
+
+  const liquidityBrand = await E(liquidityIssuer).getBrand();
+  const liquidity = value => amountMath.make(value, liquidityBrand);
+
   const alice = await makeTrader(
     [moolaPurse, simoleanPurse, liquidityIssuer.makeEmptyPurse()],
     zoe,
@@ -353,13 +356,15 @@ test('autoSwap jig - add liquidity in exact ratio', async t => {
   /** @type {AutoswapPublicFacet} */
   const publicFacet = startRecord.publicFacet;
   const liquidityIssuer = await E(publicFacet).getLiquidityIssuer();
-  const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
   let poolState = {
     c: 0n,
     s: 0n,
     l: 0n,
     k: 0n,
   };
+
+  const liquidityBrand = await E(liquidityIssuer).getBrand();
+  const liquidity = value => amountMath.make(value, liquidityBrand);
 
   // Setup Alice
   const moolaPurse = moolaIssuer.makeEmptyPurse();
@@ -499,7 +504,6 @@ test('autoSwap jig - swap varying amounts', async t => {
   /** @type {AutoswapPublicFacet} */
   const publicFacet = startRecord.publicFacet;
   const liquidityIssuer = await E(publicFacet).getLiquidityIssuer();
-  const { make: liquidity } = await makeLocalAmountMath(liquidityIssuer);
   let poolState = {
     c: 0n,
     s: 0n,
@@ -518,6 +522,9 @@ test('autoSwap jig - swap varying amounts', async t => {
     publicFacet,
     moolaIssuer,
   );
+
+  const liquidityBrand = await E(liquidityIssuer).getBrand();
+  const liquidity = value => amountMath.make(value, liquidityBrand);
 
   const issuerRecord = harden({
     Central: moolaIssuer,

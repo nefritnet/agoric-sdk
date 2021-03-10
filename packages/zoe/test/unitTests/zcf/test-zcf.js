@@ -4,7 +4,7 @@ import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 
-import { MathKind } from '@agoric/ertp';
+import { MathKind, amountMath } from '@agoric/ertp';
 import { E } from '@agoric/eventual-send';
 import { assert, details as X } from '@agoric/assert';
 
@@ -26,19 +26,6 @@ test(`zcf.getInvitationIssuer`, async t => {
   t.is(zcfInvitationIssuer, zoeInvitationIssuer);
 });
 
-const compareAmountMath = (t, actualMath, expectedMath) => {
-  t.is(actualMath.getAmountMathKind(), expectedMath.getAmountMathKind());
-  t.is(actualMath.getBrand(), expectedMath.getBrand());
-};
-
-const compareAmountMaths = (t, actualMaths, expectedMaths) => {
-  t.deepEqual(Object.keys(actualMaths), Object.keys(expectedMaths));
-  Object.entries(actualMaths).forEach(([keyword, math]) => {
-    const expectedMath = expectedMaths[keyword];
-    compareAmountMath(t, math, expectedMath);
-  });
-};
-
 const testTerms = async (t, zcf, expected) => {
   // Note that the amountMath are made locally within Zoe, so they
   // will not match the amountMath gotten from the setup code.
@@ -46,8 +33,6 @@ const testTerms = async (t, zcf, expected) => {
   const zcfTermsMinusAmountMath = { ...zcfTerms, maths: {} };
   const expectedMinusAmountMath = { ...expected, maths: {} };
   t.deepEqual(zcfTermsMinusAmountMath, expectedMinusAmountMath);
-
-  compareAmountMaths(t, zcfTerms.maths, expected.maths);
 };
 
 test(`zcf.getTerms - empty`, async t => {
@@ -89,7 +74,6 @@ test(`zcf.getTerms - standard with 2 issuers and custom`, async t => {
   const expected = {
     brands: { A: moolaKit.brand, B: simoleanKit.brand },
     issuers: { A: moolaKit.issuer, B: simoleanKit.issuer },
-    maths: { A: moolaKit.amountMath, B: simoleanKit.amountMath },
     whatever: 'whatever',
   };
   const issuerKeywordRecord = { A: moolaKit.issuer, B: simoleanKit.issuer };
@@ -105,11 +89,6 @@ test(`zcf.getTerms & zcf.saveIssuer`, async t => {
   const expected = {
     brands: { A: moolaKit.brand, B: simoleanKit.brand, C: bucksKit.brand },
     issuers: { A: moolaKit.issuer, B: simoleanKit.issuer, C: bucksKit.issuer },
-    maths: {
-      A: moolaKit.amountMath,
-      B: simoleanKit.amountMath,
-      C: bucksKit.amountMath,
-    },
     whatever: 'whatever',
   };
   const issuerKeywordRecord = { A: moolaKit.issuer, B: simoleanKit.issuer };
@@ -167,11 +146,6 @@ test(`zcf.saveIssuer & zoe.getTerms`, async t => {
   const expected = {
     brands: { A: moolaKit.brand, B: simoleanKit.brand, C: bucksKit.brand },
     issuers: { A: moolaKit.issuer, B: simoleanKit.issuer, C: bucksKit.issuer },
-    maths: {
-      A: moolaKit.amountMath,
-      B: simoleanKit.amountMath,
-      C: bucksKit.amountMath,
-    },
     whatever: 'whatever',
   };
   const issuerKeywordRecord = { A: moolaKit.issuer, B: simoleanKit.issuer };
@@ -189,8 +163,6 @@ test(`zcf.saveIssuer & zoe.getTerms`, async t => {
   const zoeTermsMinusAmountMath = { ...zoeTerms, maths: {} };
   const expectedMinusAmountMath = { ...expected, maths: {} };
   t.deepEqual(zoeTermsMinusAmountMath, expectedMinusAmountMath);
-
-  compareAmountMaths(t, zoeTerms.maths, expected.maths);
 });
 
 test(`zcf.saveIssuer - bad issuer`, async t => {
@@ -368,24 +340,10 @@ test(`zcf.makeZCFMint - NAT`, async t => {
   const expected = {
     issuers: { A: issuerRecord.issuer },
     brands: { A: issuerRecord.brand },
-    maths: { A: issuerRecord.amountMath },
   };
   await testTerms(t, zcf, expected);
-  t.is(issuerRecord.amountMath.getAmountMathKind(), MathKind.NAT);
+  t.is(issuerRecord.mathKind, MathKind.NAT);
   t.is(issuerRecord.brand.getDisplayInfo(), undefined);
-});
-
-test(`zcf.makeZCFMint - STRING_SET`, async t => {
-  const { zcf } = await setupZCFTest();
-  const zcfMint = await zcf.makeZCFMint('A', MathKind.STRING_SET);
-  const issuerRecord = zcfMint.getIssuerRecord();
-  const expected = {
-    issuers: { A: issuerRecord.issuer },
-    brands: { A: issuerRecord.brand },
-    maths: { A: issuerRecord.amountMath },
-  };
-  await testTerms(t, zcf, expected);
-  t.is(issuerRecord.amountMath.getAmountMathKind(), MathKind.STRING_SET);
 });
 
 test(`zcf.makeZCFMint - SET`, async t => {
@@ -395,10 +353,9 @@ test(`zcf.makeZCFMint - SET`, async t => {
   const expected = {
     issuers: { A: issuerRecord.issuer },
     brands: { A: issuerRecord.brand },
-    maths: { A: issuerRecord.amountMath },
   };
   await testTerms(t, zcf, expected);
-  t.is(issuerRecord.amountMath.getAmountMathKind(), MathKind.SET);
+  t.is(issuerRecord.mathKind, MathKind.SET);
 });
 
 test(`zcf.makeZCFMint - mintGains - no args`, async t => {
@@ -413,10 +370,13 @@ test(`zcf.makeZCFMint - mintGains - no args`, async t => {
 test(`zcf.makeZCFMint - mintGains - no seat`, async t => {
   const { zcf } = await setupZCFTest();
   const zcfMint = await zcf.makeZCFMint('A', MathKind.NAT);
-  const { amountMath, brand } = zcfMint.getIssuerRecord();
-  const zcfSeat = zcfMint.mintGains({ A: amountMath.make(4) });
+  const { brand } = zcfMint.getIssuerRecord();
+  const zcfSeat = zcfMint.mintGains({ A: amountMath.make(4n, brand) });
   t.truthy(zcfSeat);
-  t.deepEqual(zcfSeat.getAmountAllocated('A', brand), amountMath.make(4));
+  t.deepEqual(
+    zcfSeat.getAmountAllocated('A', brand),
+    amountMath.make(4n, brand),
+  );
 });
 
 test(`zcf.makeZCFMint - mintGains - no gains`, async t => {
@@ -476,52 +436,79 @@ test(`zcf.makeZCFMint - mintGains - right issuer`, async t => {
   const { zcf } = await setupZCFTest();
 
   const zcfMint = await zcf.makeZCFMint('A');
-  const { amountMath, brand } = zcfMint.getIssuerRecord();
+  const { brand } = zcfMint.getIssuerRecord();
   const { zcfSeat } = zcf.makeEmptySeatKit();
-  const zcfSeat2 = zcfMint.mintGains({ A: amountMath.make(4) }, zcfSeat);
+  const zcfSeat2 = zcfMint.mintGains(
+    { A: amountMath.make(4n, brand) },
+    zcfSeat,
+  );
   t.is(zcfSeat2, zcfSeat);
-  t.deepEqual(zcfSeat.getAmountAllocated('A', brand), amountMath.make(4));
+  t.deepEqual(
+    zcfSeat.getAmountAllocated('A', brand),
+    amountMath.make(4n, brand),
+  );
 });
 
 test(`zcf.makeZCFMint - burnLosses - right issuer`, async t => {
   const { zcf } = await setupZCFTest();
 
   const zcfMint = await zcf.makeZCFMint('A');
-  const { amountMath, brand } = zcfMint.getIssuerRecord();
+  const { brand } = zcfMint.getIssuerRecord();
   const { zcfSeat } = zcf.makeEmptySeatKit();
-  const zcfSeat2 = zcfMint.mintGains({ A: amountMath.make(4) }, zcfSeat);
+  const zcfSeat2 = zcfMint.mintGains(
+    { A: amountMath.make(4n, brand) },
+    zcfSeat,
+  );
   t.is(zcfSeat2, zcfSeat);
-  t.deepEqual(zcfSeat.getAmountAllocated('A', brand), amountMath.make(4));
+  t.deepEqual(
+    zcfSeat.getAmountAllocated('A', brand),
+    amountMath.make(4n, brand),
+  );
   // TODO: return a seat?
   // https://github.com/Agoric/agoric-sdk/issues/1709
-  const result = zcfMint.burnLosses({ A: amountMath.make(1) }, zcfSeat);
+  const result = zcfMint.burnLosses({ A: amountMath.make(1n, brand) }, zcfSeat);
   t.is(result, undefined);
-  t.deepEqual(zcfSeat.getAmountAllocated('A', brand), amountMath.make(3));
+  t.deepEqual(
+    zcfSeat.getAmountAllocated('A', brand),
+    amountMath.make(3n, brand),
+  );
 });
 
 test(`zcf.makeZCFMint - mintGains - seat exited`, async t => {
   const { zcf } = await setupZCFTest();
   const zcfMint = await zcf.makeZCFMint('A');
-  const { amountMath } = zcfMint.getIssuerRecord();
+  const { brand } = zcfMint.getIssuerRecord();
   const { zcfSeat } = zcf.makeEmptySeatKit();
   zcfSeat.exit();
-  t.throws(() => zcfMint.mintGains({ A: amountMath.make(4) }, zcfSeat), {
-    message: `seat has been exited`,
-  });
+  t.throws(
+    () => zcfMint.mintGains({ A: amountMath.make(4n, brand) }, zcfSeat),
+    {
+      message: `seat has been exited`,
+    },
+  );
 });
 
 test(`zcf.makeZCFMint - burnLosses - seat exited`, async t => {
   const { zcf } = await setupZCFTest();
   const zcfMint = await zcf.makeZCFMint('A');
-  const { amountMath, brand } = zcfMint.getIssuerRecord();
+  const { brand } = zcfMint.getIssuerRecord();
   const { zcfSeat } = zcf.makeEmptySeatKit();
-  const zcfSeat2 = zcfMint.mintGains({ A: amountMath.make(4) }, zcfSeat);
+  const zcfSeat2 = zcfMint.mintGains(
+    { A: amountMath.make(4n, brand) },
+    zcfSeat,
+  );
   t.is(zcfSeat2, zcfSeat);
-  t.deepEqual(zcfSeat.getAmountAllocated('A', brand), amountMath.make(4));
+  t.deepEqual(
+    zcfSeat.getAmountAllocated('A', brand),
+    amountMath.make(4n, brand),
+  );
   zcfSeat.exit();
-  t.throws(() => zcfMint.burnLosses({ A: amountMath.make(1) }, zcfSeat), {
-    message: `seat has been exited`,
-  });
+  t.throws(
+    () => zcfMint.burnLosses({ A: amountMath.make(1n, brand) }, zcfSeat),
+    {
+      message: `seat has been exited`,
+    },
+  );
 });
 
 test(`zcf.makeZCFMint - displayInfo`, async t => {
@@ -537,7 +524,6 @@ test(`zcf.makeZCFMint - displayInfo`, async t => {
   const expected = {
     issuers: { A: issuerRecord.issuer },
     brands: { A: issuerRecord.brand },
-    maths: { A: issuerRecord.amountMath },
   };
   await testTerms(t, zcf, expected);
   t.is(issuerRecord.brand.getDisplayInfo().decimalPlaces, 3);
@@ -690,8 +676,11 @@ const allocateEasy = async (
 ) => {
   // Mint some gains to change the allocation.
   const zcfMint = await zcf.makeZCFMint(zcfMintKeyword);
-  const { amountMath } = zcfMint.getIssuerRecord();
-  zcfMint.mintGains({ [gainsKeyword]: amountMath.make(gainsValue) }, zcfSeat);
+  const { brand } = zcfMint.getIssuerRecord();
+  zcfMint.mintGains(
+    { [gainsKeyword]: amountMath.make(gainsValue, brand) },
+    zcfSeat,
+  );
   return zcfMint.getIssuerRecord();
 };
 
@@ -814,19 +803,19 @@ test(`zcfSeat.stage, zcf.reallocate from zcf.makeEmptySeatKit`, async t => {
 
   const issuerRecord1 = await allocateEasy(zcf, 'Stuff', zcfSeat1, 'A', 6);
   const staging1 = zcfSeat1.stage({
-    A: issuerRecord1.amountMath.make(0),
+    A: amountMath.make(0n, issuerRecord1.brand),
   });
   const staging2 = zcfSeat2.stage({
-    B: issuerRecord1.amountMath.make(6),
+    B: amountMath.make(6n, issuerRecord1.brand),
   });
 
   zcf.reallocate(staging1, staging2);
 
   t.deepEqual(zcfSeat1.getCurrentAllocation(), {
-    A: issuerRecord1.amountMath.make(0),
+    A: amountMath.make(0n, issuerRecord1.brand),
   });
   t.deepEqual(zcfSeat2.getCurrentAllocation(), {
-    B: issuerRecord1.amountMath.make(6),
+    B: amountMath.make(6n, issuerRecord1.brand),
   });
 });
 

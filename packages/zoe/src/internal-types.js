@@ -40,6 +40,10 @@
  */
 
 /**
+ * @callback {(brand: Brand) => AmountMathKind} GetMathKind
+ */
+
+/**
  * @callback MakeZcfSeatAdminKit
  * Make the ZCF seat and seat admin
  * @param {WeakSet<SeatStaging>} allSeatStagings - a set of valid
@@ -48,6 +52,7 @@
  * - a presence from Zoe such that ZCF can tell Zoe
  * about seat events
  * @param {SeatData} seatData - pass-by-copy data to use to make the seat
+ * @param {GetMathKind} getMathKind - get the mathKind given the brand
  * @returns {ZcfSeatAdminKit}
  */
 

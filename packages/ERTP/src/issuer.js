@@ -49,7 +49,7 @@ function makeIssuerKit(
   const isEqual = (left, right) => amountMath.isEqual(left, right, brand);
 
   /** @type {Amount} */
-  const emptyAmount = amountMath.makeEmpty(amountMathKind, brand);
+  const emptyAmount = amountMath.makeEmpty(brand, amountMathKind);
 
   const {
     makeInstance: makePayment,
@@ -288,6 +288,7 @@ function makeIssuerKit(
     mint,
     issuer,
     brand,
+    amountMathKind,
   });
 }
 

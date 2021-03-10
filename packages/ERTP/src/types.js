@@ -37,7 +37,7 @@
  */
 
 /**
- * @typedef {'nat' | 'set' | 'strSet'} AmountMathKind
+ * @typedef {'nat' | 'set'} AmountMathKind
  */
 
 /**
@@ -58,9 +58,13 @@
  * @property {(amount: Amount, brand: Brand) => Value} getValue
  * Extract and return the value.
  *
- * @property {(string: mathKind, brand: Brand) => Amount} makeEmpty
+ * @property {(brand: Brand, string: mathKind=) => Amount} makeEmpty
  * Return the amount representing an empty amount. This is the
  * identity element for MathHelpers.add and MatHelpers.subtract.
+ *
+ * @property {(amount: Amount) => Amount} makeEmptyFromAmount
+ * Return the amount representing an empty amount, using another
+ * amount as the template for the brand and mathKind.
  *
  * @property {(amount: Amount, brand?: Brand) => boolean} isEmpty
  * Return true if the Amount is empty. Otherwise false.
@@ -220,6 +224,7 @@
  * @property {Mint} mint
  * @property {Issuer} issuer
  * @property {Brand} brand
+ * @property {AmountMathKind} amountMathKind
  */
 
 /**

@@ -1,6 +1,6 @@
 // @ts-check
 
-import { makeIssuerKit, MathKind } from '@agoric/ertp';
+import { makeIssuerKit, MathKind, amountMath } from '@agoric/ertp';
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
 
@@ -30,10 +30,7 @@ import { assert } from '@agoric/assert';
 const start = zcf => {
   const { tokenName = 'token' } = zcf.getTerms();
   // Create the internal token mint
-  const { issuer, mint, amountMath: tokenMath } = makeIssuerKit(
-    tokenName,
-    MathKind.SET,
-  );
+  const { issuer, mint, brand } = makeIssuerKit(tokenName, MathKind.SET);
 
   const zoeService = zcf.getZoeService();
 
@@ -44,18 +41,17 @@ const start = zcf => {
     sellItemsInstallation,
     pricePerItem,
   }) => {
-    const tokenAmount = tokenMath.make(
-      harden(
-        Array(count)
-          .fill(undefined)
-          .map((_, i) => {
-            const tokenNumber = i + 1;
-            return {
-              ...customValueProperties,
-              number: tokenNumber,
-            };
-          }),
-      ),
+    const tokenAmount = amountMath.make(
+      Array(count)
+        .fill(undefined)
+        .map((_, i) => {
+          const tokenNumber = i + 1;
+          return {
+            ...customValueProperties,
+            number: tokenNumber,
+          };
+        }),
+      brand,
     );
     const tokenPayment = mint.mintPayment(harden(tokenAmount));
     // Note that the proposal `want` is empty

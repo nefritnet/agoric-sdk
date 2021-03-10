@@ -7,7 +7,7 @@ import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 import { E } from '@agoric/eventual-send';
-
+import { amountMath } from '@agoric/ertp';
 import bundleSource from '@agoric/bundle-source';
 import { makeNotifierKit } from '@agoric/notifier';
 
@@ -52,8 +52,6 @@ test('loan - lend - exit before borrow', async t => {
   const timer = buildManualTimer(console.log);
 
   const priceAuthority = makeFakePriceAuthority({
-    mathIn: collateralKit.amountMath,
-    mathOut: loanKit.amountMath,
     priceList: [],
     timer,
   });
@@ -73,7 +71,7 @@ test('loan - lend - exit before borrow', async t => {
     zoe,
   ).startInstance(installation, issuerKeywordRecord, terms);
 
-  const maxLoan = loanKit.amountMath.make(1000);
+  const maxLoan = amountMath.make(1000n, loanKit.brand);
 
   // Alice is willing to lend Loan tokens
   const proposal = harden({

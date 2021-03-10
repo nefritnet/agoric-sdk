@@ -103,7 +103,7 @@ test('natMathHelpers getValue no brand', t => {
 test('natMathHelpers makeEmpty', t => {
   const empty = m.make(0n, mockBrand);
 
-  t.deepEqual(m.makeEmpty(MathKind.NAT, mockBrand), empty, `empty is 0`);
+  t.deepEqual(m.makeEmpty(mockBrand), empty, `empty is 0`);
 });
 
 test('natMathHelpers makeEmpty no brand', t => {

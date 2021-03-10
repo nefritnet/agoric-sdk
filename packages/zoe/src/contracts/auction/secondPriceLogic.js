@@ -1,4 +1,6 @@
-import { amountMath, MathKind } from '@agoric/ertp';
+// @ts-check
+
+import { amountMath } from '@agoric/ertp';
 
 export const calcWinnerAndClose = (zcf, sellSeat, bidSeats) => {
   const {
@@ -7,8 +9,7 @@ export const calcWinnerAndClose = (zcf, sellSeat, bidSeats) => {
   } = sellSeat.getProposal();
 
   const bidBrand = minBid.brand;
-  const assetBrand = assetAmount.brand;
-  const emptyBid = amountMath.makeEmpty(MathKind.NAT, bidBrand);
+  const emptyBid = amountMath.makeEmpty(bidBrand);
 
   let highestBid = emptyBid;
   let secondHighestBid = emptyBid;
@@ -52,8 +53,7 @@ export const calcWinnerAndClose = (zcf, sellSeat, bidSeats) => {
   // same.
   zcf.reallocate(
     sellSeat.stage({
-      // TODO: figure out how to get the mathKind
-      Asset: amountMath.makeEmpty(MathKind.NAT, assetBrand),
+      Asset: amountMath.makeEmptyFromAmount(assetAmount),
       Ask: secondHighestBid,
     }),
     highestBidSeat.stage({ Asset: assetAmount, Bid: winnerRefund }),
