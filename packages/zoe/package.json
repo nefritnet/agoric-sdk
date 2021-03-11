@@ -89,8 +89,6 @@
       "test-secondPriceAuction.js",
       "test-escrowToVote",
       "test-coveredCall",
-      "# offerOk threw: \"instance\" not found: (an object)'",
-      "test-otcDesk.js",
       "# We use WORKER_TYPE=xs ava to run these...",
       "swingsetTests"
     ]
