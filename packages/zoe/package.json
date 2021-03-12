@@ -74,16 +74,9 @@
   ],
   "ava-xs": {
     "exclude": [
-      "# eek! SIGSEGV in GC https://github.com/Moddable-OpenSource/moddable/issues/592",
-      "test-loan-e2e.js",
-      "# another SEGV, but not in --debug so I cannot get a stack trace",
-      "contracts/test-callSpread-calculation",
-      "# another SEGV; not investigated",
+      "# F test/unitTests/contracts/loan/test-borrow.js borrow, then addCollateral, then getLiquidationPromise",
+      "# amount value: 100, expected value: 101, message",
       "loan/test-borrow.js",
-      "test-fakePriceAuthority.js",
-      "test-offerSafety",
-      "test-scriptedOracle",
-      "test-zoeHelpers",
       "# We use WORKER_TYPE=xs ava to run these...",
       "swingsetTests"
     ]
