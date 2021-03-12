@@ -26,7 +26,7 @@
  */
 
 /**
- * typedef {Object} PriceAmountPair
+ * @typedef {Object} PriceAmountPair
  *
  * @property {Amount} amountOut
  * @property {Amount} amountIn

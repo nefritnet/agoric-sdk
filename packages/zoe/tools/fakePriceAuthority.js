@@ -1,4 +1,3 @@
-// @ts-check
 import { makeIssuerKit, MathKind, amountMath } from '@agoric/ertp';
 import { makePromiseKit } from '@agoric/promise-kit';
 import {

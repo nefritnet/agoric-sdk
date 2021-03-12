@@ -11,6 +11,7 @@ const setup = () => {
     simoleans: simoleanBundle,
     bucks: bucksBundle,
   };
+  /** @type {Map<string, Brand>} */
   const brands = new Map();
 
   for (const k of Object.getOwnPropertyNames(allBundles)) {
@@ -21,7 +22,29 @@ const setup = () => {
 
   const makeSimpleMake = brand => value => amountMath.make(value, brand);
 
-  return harden({
+  /**
+   * @typedef {Object} BasicMints
+   * @property {Issuer} moolaIssuer
+   * @property {Mint} moolaMint
+   * @property {IssuerKit} moolaR
+   * @property {IssuerKit} moolaKit
+   * @property {Issuer} simoleanIssuer
+   * @property {Mint} simoleanMint
+   * @property {IssuerKit} simoleanR
+   * @property {IssuerKit} simoleanKit
+   * @property {Issuer} bucksIssuer
+   * @property {Mint} bucksMint
+   * @property {IssuerKit} bucksR
+   * @property {IssuerKit} bucksKit
+   * @property {Map<string, Brand>} brands
+   * @property {(value: any) => Amount} moola
+   * @property {(value: any) => Amount} simoleans
+   * @property {(value: any) => Amount} bucks
+   * @property {ZoeService} zoe
+   */
+
+  /** @type {BasicMints} */
+  const result = {
     moolaIssuer: moolaBundle.issuer,
     moolaMint: moolaBundle.mint,
     moolaR: moolaBundle,
@@ -39,7 +62,9 @@ const setup = () => {
     simoleans: makeSimpleMake(simoleanBundle.brand),
     bucks: makeSimpleMake(bucksBundle.brand),
     zoe,
-  });
+  };
+  harden(result);
+  return result;
 };
 harden(setup);
 export { setup };

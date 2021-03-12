@@ -1,5 +1,3 @@
-// @ts-check
-
 import { Far } from '@agoric/marshal';
 
 import '../../exported';

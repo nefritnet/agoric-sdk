@@ -31,7 +31,6 @@ const makeVats = (log, vats, zoe, installations, startingValues) => {
 
   // Setup Alice
   const alicePayment = makePayments(startingValues);
-  // const alicePayment = mints[0].mintPayment(amountMaths[0].make(3));
   const aliceP = E(vats.alice).build(zoe, issuers, alicePayment, installations);
 
   log(`=> alice is set up`);

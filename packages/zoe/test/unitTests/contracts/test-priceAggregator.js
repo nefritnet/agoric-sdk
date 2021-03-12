@@ -1,5 +1,5 @@
 /* global __dirname */
-// @ts-check
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -249,9 +249,8 @@ test('quoteAtTime', /** @param {ExecutionContext} t */ async t => {
   const aggregator = await t.context.makeMedianAggregator(1n);
   const {
     timer: oracleTimer,
-    brands: { Out: usdBrand },
+    brands: { Out: usdBrand, In: brandIn },
     issuers: { Quote: quoteIssuer },
-    maths: { In: mathIn, Out: mathOut, Quote: quoteMath },
   } = await E(zoe).getTerms(aggregator.instance);
 
   const price1000 = await makeFakePriceOracle(t, 1000n);
@@ -259,7 +258,11 @@ test('quoteAtTime', /** @param {ExecutionContext} t */ async t => {
   const price800 = await makeFakePriceOracle(t, 800n);
   const pa = E(aggregator.publicFacet).getPriceAuthority();
 
-  const quoteAtTime = E(pa).quoteAtTime(7n, mathIn.make(41), usdBrand);
+  const quoteAtTime = E(pa).quoteAtTime(
+    7n,
+    amountMath.make(41n, brandIn),
+    usdBrand,
+  );
 
   /** @type {PriceQuote | undefined} */
   let priceQuote;
@@ -275,7 +278,9 @@ test('quoteAtTime', /** @param {ExecutionContext} t */ async t => {
   const userQuotePK = makePromiseKit();
   await E(userTimer).setWakeup(1n, {
     async wake(_timestamp) {
-      userQuotePK.resolve(E(pa).quoteGiven(mathIn.make(23), usdBrand));
+      userQuotePK.resolve(
+        E(pa).quoteGiven(amountMath.make(23, brandIn), usdBrand),
+      );
       await userQuotePK.promise;
     },
   });
@@ -330,11 +335,11 @@ test('quoteAtTime', /** @param {ExecutionContext} t */ async t => {
       timer: uTimer,
       timestamp: uTimestamp,
     },
-  ] = await E(quoteMath).getValue(userQuote);
+  ] = userQuote.value;
   t.is(uTimer, oracleTimer);
   t.is(uTimestamp, 5n);
-  t.is(await E(mathIn).getValue(userIn), 23n);
-  t.is((await E(mathOut).getValue(userOut)) / 23n, 1060n);
+  t.is(userIn.value, 23n);
+  t.is(userOut.value / 23n, 1060n);
 
   await E(oracleTimer).tick();
 
@@ -348,13 +353,11 @@ test('quoteAtTime', /** @param {ExecutionContext} t */ async t => {
 
   const quote = await E(quoteIssuer).getAmountOf(priceQuote.quotePayment);
   t.deepEqual(quote, priceQuote.quoteAmount);
-  const [{ amountIn, amountOut, timer, timestamp }] = await E(
-    quoteMath,
-  ).getValue(quote);
+  const [{ amountIn, amountOut, timer, timestamp }] = quote.value;
   t.is(timer, oracleTimer);
   t.is(timestamp, 7n);
-  t.is(await E(mathIn).getValue(amountIn), 41n);
-  t.is((await E(mathOut).getValue(amountOut)) / 41n, 960n);
+  t.is(amountIn.value, 41n);
+  t.is(amountOut.value / 41n, 960n);
 });
 
 test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
@@ -364,7 +367,7 @@ test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
   const {
     timer: oracleTimer,
     issuers: { Quote: quoteIssuer },
-    maths: { In: mathIn, Out: mathOut, Quote: quoteMath },
+    brands,
   } = await E(zoe).getTerms(aggregator.instance);
 
   const price1000 = await makeFakePriceOracle(t, 1000n);
@@ -373,8 +376,8 @@ test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
   const pa = E(aggregator.publicFacet).getPriceAuthority();
 
   const quoteWhenGTE = E(pa).quoteWhenGTE(
-    mathIn.make(37),
-    mathOut.make(1183 * 37),
+    amountMath.make(37n, brands.In),
+    amountMath.make(1183n * 37n, brands.Out),
   );
 
   /** @type {PriceQuote | undefined} */
@@ -388,8 +391,8 @@ test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
   );
 
   const quoteWhenLTE = E(pa).quoteWhenLTE(
-    mathIn.make(29),
-    mathOut.make(974 * 29),
+    amountMath.make(29n, brands.In),
+    amountMath.make(974n * 29n, brands.Out),
   );
 
   /** @type {PriceQuote | undefined} */
@@ -436,11 +439,11 @@ test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
       timer: aboveTimer,
       timestamp: aboveTimestamp,
     },
-  ] = await E(quoteMath).getValue(aboveQuote);
+  ] = aboveQuote.value;
   t.is(aboveTimer, oracleTimer);
   t.is(aboveTimestamp, 4n);
-  t.is(await E(mathIn).getValue(aboveIn), 37n);
-  t.is((await E(mathOut).getValue(aboveOut)) / 37n, 1183n);
+  t.is(aboveIn.value, 37n);
+  t.is(aboveOut.value / 37n, 1183n);
 
   await E(aggregator.creatorFacet).initOracle(price800.instance, {
     increment: 17n,
@@ -468,9 +471,9 @@ test('quoteWhen', /** @param {ExecutionContext} t */ async t => {
       timer: belowTimer,
       timestamp: belowTimestamp,
     },
-  ] = await E(quoteMath).getValue(belowQuote);
+  ] = belowQuote.value;
   t.is(belowTimer, oracleTimer);
   t.is(belowTimestamp, 6n);
-  t.is(await E(mathIn).getValue(belowIn), 29n);
-  t.is((await E(mathOut).getValue(belowOut)) / 29n, 960n);
+  t.is(belowIn.value, 29n);
+  t.is(belowOut.value / 29n, 960n);
 });

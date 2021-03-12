@@ -1,5 +1,3 @@
-// ts-check
-
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -80,7 +78,13 @@ test('test doLiquidation with mocked autoswap', async t => {
     makeSwapInInvitation: () => zcf.makeInvitation(swapHandler, 'swap'),
   });
 
-  await doLiquidation(zcf, collateralSeat, autoswapPublicFacetP, lenderSeat);
+  await doLiquidation(
+    zcf,
+    collateralSeat,
+    autoswapPublicFacetP,
+    lenderSeat,
+    loanKit.brand,
+  );
 
   // Ensure collateralSeat exited
   t.truthy(collateralSeat.hasExited());
@@ -142,7 +146,14 @@ test('test with malfunctioning autoswap', async t => {
   });
 
   await t.throwsAsync(
-    () => doLiquidation(zcf, collateralSeat, autoswapPublicFacetP, lenderSeat),
+    () =>
+      doLiquidation(
+        zcf,
+        collateralSeat,
+        autoswapPublicFacetP,
+        lenderSeat,
+        loanKit.brand,
+      ),
     { message: 'Pool not initialized' },
   );
 

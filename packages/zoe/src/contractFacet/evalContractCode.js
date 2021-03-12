@@ -1,5 +1,3 @@
-// @ts-check
-
 import { importBundle } from '@agoric/import-bundle';
 import { assert } from '@agoric/assert';
 

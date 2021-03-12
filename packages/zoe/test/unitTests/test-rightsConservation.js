@@ -6,7 +6,7 @@ import test from 'ava';
 import { amountMath, makeIssuerKit } from '@agoric/ertp';
 import { assertRightsConserved } from '../../src/contractFacet/rightsConservation';
 
-const setupAmountMaths = () => {
+const setupBrands = () => {
   const moolaIssuerResults = makeIssuerKit('moola');
   const simoleanIssuerResults = makeIssuerKit('simoleans');
   const bucksIssuerResults = makeIssuerKit('bucks');
@@ -23,7 +23,7 @@ const makeAmountMatrix = (brands, valueMatrix) =>
 
 // rights are conserved for amount with Nat values
 test(`assertRightsConserved - true for amount with nat values`, t => {
-  const brands = setupAmountMaths();
+  const brands = setupBrands();
   const previousValues = [
     [0, 1, 0],
     [4, 1, 0],
@@ -43,7 +43,7 @@ test(`assertRightsConserved - true for amount with nat values`, t => {
 
 // rights are *not* conserved for amount with Nat values
 test(`assertRightsConserved - false for amount with Nat values`, t => {
-  const brands = setupAmountMaths();
+  const brands = setupBrands();
   const oldValues = [
     [0, 1, 4],
     [4, 1, 0],

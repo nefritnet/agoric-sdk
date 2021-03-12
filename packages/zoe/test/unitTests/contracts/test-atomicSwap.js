@@ -1,9 +1,9 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import bundleSource from '@agoric/bundle-source';
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
@@ -58,7 +58,7 @@ test('zoe - atomicSwap', async t => {
           .then(amountDeposited =>
             t.deepEqual(
               amountDeposited,
-              moola(0),
+              moola(0n),
               `Alice didn't get any of what she put in`,
             ),
           );
@@ -425,7 +425,7 @@ test('zoe - atomicSwap like-for-like', async t => {
   );
 
   // Alice didn't get any of what Alice put in
-  t.deepEqual(await moolaIssuer.getAmountOf(aliceAssetPayout), moola(0));
+  t.deepEqual(await moolaIssuer.getAmountOf(aliceAssetPayout), moola(0n));
 
   // Alice deposits her payout to ensure she can
   const aliceAssetAmount = await aliceMoolaPurse.deposit(aliceAssetPayout);

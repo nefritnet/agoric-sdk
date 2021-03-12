@@ -1,5 +1,3 @@
-// @ts-check
-
 // some tools to make treating ratios as percents easier
 
 import { assert, details as X } from '@agoric/assert';
@@ -34,5 +32,5 @@ export function make100Percent(brand) {
 }
 
 export function make0Percent(brand) {
-  return makeRatio(0, brand);
+  return makeRatio(0n, brand);
 }

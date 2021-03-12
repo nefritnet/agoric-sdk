@@ -1,5 +1,5 @@
 /* global __dirname */
-// @ts-check
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -224,7 +224,6 @@ test(`zoe.getTerms - none`, async t => {
   t.deepEqual(await E(zoe).getTerms(instance), {
     brands: {},
     issuers: {},
-    maths: {},
   });
 });
 

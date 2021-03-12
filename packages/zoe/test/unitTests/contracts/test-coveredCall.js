@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -76,7 +77,7 @@ test('zoe - coveredCall', async t => {
           .then(amountDeposited =>
             t.deepEqual(
               amountDeposited,
-              moola(0),
+              moola(0n),
               `Alice didn't get any of what she put in`,
             ),
           );
@@ -329,7 +330,7 @@ test(`zoe - coveredCall - alice's deadline expires, cancelling alice and bob`, a
   // Bob had 0 moola and 7 simoleans.
   t.deepEqual(aliceMoolaPurse.getCurrentAmount(), moola(3));
   t.deepEqual(aliceSimoleanPurse.getCurrentAmount(), simoleans(0));
-  t.deepEqual(bobMoolaPurse.getCurrentAmount(), moola(0));
+  t.deepEqual(bobMoolaPurse.getCurrentAmount(), moola(0n));
   t.deepEqual(bobSimoleanPurse.getCurrentAmount(), simoleans(7));
 });
 
@@ -416,7 +417,7 @@ test('zoe - coveredCall with swap for invitation', async t => {
   // expected covered call installation (code)? Does it use the issuers
   // that he expects (moola and simoleans)?
   const invitationIssuer = zoe.getInvitationIssuer();
-  const invitationBrand = E(invitationIssuer).getBrand();
+  const invitationBrand = await E(invitationIssuer).getBrand();
   const bobExclOption = await invitationIssuer.claim(optionP);
   const optionAmount = await invitationIssuer.getAmountOf(bobExclOption);
   const optionDesc = optionAmount.value[0];
@@ -549,7 +550,7 @@ test('zoe - coveredCall with swap for invitation', async t => {
     simoleans(0),
   );
 
-  t.deepEqual(await moolaR.issuer.getAmountOf(aliceMoolaPayout), moola(0));
+  t.deepEqual(await moolaR.issuer.getAmountOf(aliceMoolaPayout), moola(0n));
   t.deepEqual(
     await simoleanR.issuer.getAmountOf(aliceSimoleanPayout),
     simoleans(7),
@@ -819,7 +820,7 @@ test('zoe - coveredCall with coveredCall for invitation', async t => {
     simoleans(0),
   );
 
-  t.deepEqual(await moolaR.issuer.getAmountOf(aliceMoolaPayout), moola(0));
+  t.deepEqual(await moolaR.issuer.getAmountOf(aliceMoolaPayout), moola(0n));
   t.deepEqual(
     await simoleanR.issuer.getAmountOf(aliceSimoleanPayout),
     simoleans(7),
@@ -867,7 +868,6 @@ test('zoe - coveredCall non-fungible', async t => {
     rpgMint,
     cryptoCats,
     rpgItems,
-    amountMaths,
     createRpgItem,
     zoe,
   } = setupNonFungible();
@@ -934,14 +934,16 @@ test('zoe - coveredCall non-fungible', async t => {
   t.is(optionValue.installation, coveredCallInstallation);
   t.is(optionValue.description, 'exerciseOption');
   t.truthy(
-    amountMaths
-      .get('cc')
-      .isEqual(optionValue.underlyingAssets.UnderlyingAsset, growlTigerAmount),
+    amountMath.isEqual(
+      optionValue.underlyingAssets.UnderlyingAsset,
+      growlTigerAmount,
+    ),
   );
   t.truthy(
-    amountMaths
-      .get('rpg')
-      .isEqual(optionValue.strikePrice.StrikePrice, aGloriousShieldAmount),
+    amountMath.isEqual(
+      optionValue.strikePrice.StrikePrice,
+      aGloriousShieldAmount,
+    ),
   );
   t.is(optionValue.expirationDate, 1n);
   t.deepEqual(optionValue.timeAuthority, timer);

@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -65,7 +66,7 @@ test('zoe - secondPriceAuction w/ 3 bids', async t => {
           .then(amountDeposited =>
             t.deepEqual(
               amountDeposited,
-              moola(0),
+              moola(0n),
               `Alice didn't get any of what she put in`,
             ),
           );
@@ -183,7 +184,7 @@ test('zoe - secondPriceAuction w/ 3 bids', async t => {
           .getPayout('Asset')
           .then(moolaPurse.deposit)
           .then(amountDeposited =>
-            t.deepEqual(amountDeposited, moola(0), `didn't win the auction`),
+            t.deepEqual(amountDeposited, moola(0n), `didn't win the auction`),
           );
 
         await E(seat)
@@ -347,7 +348,7 @@ test('zoe - secondPriceAuction - alice tries to exit', async t => {
   // carol gets the assets.
   t.deepEqual(
     await moolaR.issuer.getAmountOf(aliceMoolaPayout),
-    moola(0),
+    moola(0n),
     `alice has no moola`,
   );
 
@@ -362,7 +363,7 @@ test('zoe - secondPriceAuction - alice tries to exit', async t => {
   await aliceSimoleanPurse.deposit(aliceSimoleanPayout);
 
   // Bob gets a refund
-  t.deepEqual(await moolaR.issuer.getAmountOf(bobMoolaPayout), moola(0));
+  t.deepEqual(await moolaR.issuer.getAmountOf(bobMoolaPayout), moola(0n));
   t.deepEqual(
     await simoleanR.issuer.getAmountOf(bobSimoleanPayout),
     bobProposal.give.Bid,

@@ -1,5 +1,3 @@
-// ts-check
-
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -16,7 +14,7 @@ test('test calculateInterest', async t => {
   const brand = brands.get('moola');
   const testCalculateInterest = ([oldDebt, interestRate, expected]) => {
     const debt = { brand, value: oldDebt };
-    const interestRateRatio = makeRatio(interestRate, brand, 10000);
+    const interestRateRatio = makeRatio(interestRate, brand, 10000n);
     const interest = calculateInterest(debt, interestRateRatio);
     t.is(interest.value, expected);
     t.is(interest.brand, brand);

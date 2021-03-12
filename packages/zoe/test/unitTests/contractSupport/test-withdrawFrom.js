@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -12,18 +13,9 @@ import { makeZoe } from '../../..';
 import { makeFakeVatAdmin } from '../../../src/contractFacet/fakeVatAdmin';
 import { depositToSeat, withdrawFromSeat } from '../../../src/contractSupport';
 import { assertPayoutAmount } from '../../zoeTestHelpers';
+import { makeOffer } from '../makeOffer';
 
 const contractRoot = `${__dirname}/../zcf/zcfTesterContract`;
-
-const makeOffer = async (zoe, zcf, proposal, payments) => {
-  let zcfSeat;
-  const getSeat = seat => {
-    zcfSeat = seat;
-  };
-  const invitation = await zcf.makeInvitation(getSeat, 'seat');
-  const userSeat = await E(zoe).offer(invitation, proposal, payments);
-  return { zcfSeat, userSeat };
-};
 
 async function setupContract(moolaIssuer, bucksIssuer) {
   let testJig;
@@ -83,7 +75,7 @@ test(`withdrawFromSeat - violates offerSafety`, async t => {
   await depositToSeat(zcf, zcfSeat, { B: bucks(2) }, { B: newBucks });
   t.deepEqual(
     zcfSeat.getCurrentAllocation(),
-    { A: moola(0), B: bucks(7) },
+    { A: moola(0n), B: bucks(7) },
     'should add deposit',
   );
   await t.throwsAsync(
@@ -97,7 +89,7 @@ test(`withdrawFromSeat - violates offerSafety`, async t => {
 
   t.deepEqual(
     zcfSeat.getCurrentAllocation(),
-    { A: moola(0), B: bucks(7) },
+    { A: moola(0n), B: bucks(7) },
     'bad withdraw should leave allocations unchanged',
   );
 });

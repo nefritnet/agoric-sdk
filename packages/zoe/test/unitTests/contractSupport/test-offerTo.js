@@ -1,5 +1,4 @@
 /* global __dirname */
-// @ts-check
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
@@ -18,18 +17,9 @@ import {
   assertProposalShape,
   swapExact,
 } from '../../../src/contractSupport/zoeHelpers';
+import { makeOffer } from '../makeOffer';
 
 const contractRoot = `${__dirname}/../zcf/zcfTesterContract`;
-
-const makeOffer = async (zoe, zcf, proposal, payments) => {
-  let zcfSeat;
-  const getSeat = seat => {
-    zcfSeat = seat;
-  };
-  const invitation = await zcf.makeInvitation(getSeat, 'seat');
-  const userSeat = await E(zoe).offer(invitation, proposal, payments);
-  return { zcfSeat, userSeat };
-};
 
 const setupContract = async (moolaIssuer, bucksIssuer) => {
   const instanceToZCF = new Map();
@@ -241,7 +231,7 @@ test(`offerTo - violates offer safety of fromSeat`, async t => {
   );
 
   t.deepEqual(fromSeatContractA.getCurrentAllocation(), {
-    TokenJ: moola(0),
+    TokenJ: moola(0n),
     TokenK: bucks(5),
   });
   t.falsy(fromSeatContractA.hasExited());

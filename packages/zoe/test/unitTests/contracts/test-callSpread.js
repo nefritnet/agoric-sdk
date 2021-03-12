@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -16,10 +17,10 @@ const fundedCallSpread = `${__dirname}/../../../src/contracts/callSpread/fundedC
 const pricedCallSpread = `${__dirname}/../../../src/contracts/callSpread/pricedCallSpread`;
 const simpleExchange = `${__dirname}/../../../src/contracts/simpleExchange`;
 
-const makeTestPriceAuthority = (amountMaths, priceList, timer) =>
+const makeTestPriceAuthority = (brands, priceList, timer) =>
   makeFakePriceAuthority({
-    mathIn: amountMaths.get('simoleans'),
-    mathOut: amountMaths.get('moola'),
+    actualBrandIn: brands.get('simoleans'),
+    actualBrandOut: brands.get('moola'),
     priceList,
     timer,
   });
@@ -37,7 +38,6 @@ test('fundedCallSpread below Strike1', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
     brands,
   } = setup();
   const installation = await installationPFromSource(zoe, fundedCallSpread);
@@ -55,7 +55,7 @@ test('fundedCallSpread below Strike1', async t => {
 
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [54, 20, 35, 15, 28],
     manualTimer,
   );
@@ -136,7 +136,7 @@ test('fundedCallSpread above Strike2', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
+    brands,
   } = setup();
   const installation = await installationPFromSource(zoe, fundedCallSpread);
 
@@ -152,11 +152,7 @@ test('fundedCallSpread above Strike2', async t => {
   const carolBucksPurse = bucksIssuer.makeEmptyPurse();
 
   const manualTimer = buildManualTimer(console.log, 0n);
-  const priceAuthority = makeTestPriceAuthority(
-    amountMaths,
-    [20, 55],
-    manualTimer,
-  );
+  const priceAuthority = makeTestPriceAuthority(brands, [20, 55], manualTimer);
   // underlying is 2 Simoleans, strike range is 30-50 (doubled)
   const terms = harden({
     expiration: 3n,
@@ -236,7 +232,7 @@ test('fundedCallSpread, mid-strike', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
+    brands,
   } = setup();
   const installation = await installationPFromSource(zoe, fundedCallSpread);
 
@@ -252,11 +248,7 @@ test('fundedCallSpread, mid-strike', async t => {
   const carolBucksPurse = bucksIssuer.makeEmptyPurse();
 
   const manualTimer = buildManualTimer(console.log, 0n);
-  const priceAuthority = makeTestPriceAuthority(
-    amountMaths,
-    [20, 45],
-    manualTimer,
-  );
+  const priceAuthority = makeTestPriceAuthority(brands, [20, 45], manualTimer);
   // underlying is 2 Simoleans, strike range is 30-50 (doubled)
   const terms = harden({
     expiration: 3n,
@@ -335,7 +327,7 @@ test('fundedCallSpread, late exercise', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
+    brands,
   } = setup();
   const installation = await installationPFromSource(zoe, fundedCallSpread);
 
@@ -351,11 +343,7 @@ test('fundedCallSpread, late exercise', async t => {
   const carolBucksPurse = bucksIssuer.makeEmptyPurse();
 
   const manualTimer = buildManualTimer(console.log, 0n);
-  const priceAuthority = makeTestPriceAuthority(
-    amountMaths,
-    [20, 45],
-    manualTimer,
-  );
+  const priceAuthority = makeTestPriceAuthority(brands, [20, 45], manualTimer);
   // underlying is 2 Simoleans, strike range is 30-50 (doubled)
   const terms = harden({
     expiration: 3n,
@@ -434,7 +422,7 @@ test('fundedCallSpread, sell options', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
+    brands,
   } = setup();
   const installation = await installationPFromSource(zoe, fundedCallSpread);
   const invitationIssuer = await E(zoe).getInvitationIssuer();
@@ -454,11 +442,7 @@ test('fundedCallSpread, sell options', async t => {
   const carolBucksPayment = bucksMint.mintPayment(bucks(100));
 
   const manualTimer = buildManualTimer(console.log, 0n);
-  const priceAuthority = makeTestPriceAuthority(
-    amountMaths,
-    [20, 45],
-    manualTimer,
-  );
+  const priceAuthority = makeTestPriceAuthority(brands, [20, 45], manualTimer);
   // underlying is 2 Simoleans, strike range is 30-50 (doubled)
   const terms = harden({
     expiration: 3n,
@@ -613,7 +597,7 @@ test('pricedCallSpread, mid-strike', async t => {
     bucksMint,
     bucks,
     zoe,
-    amountMaths,
+    brands,
   } = setup();
   const installation = await installationPFromSource(zoe, pricedCallSpread);
 
@@ -631,7 +615,7 @@ test('pricedCallSpread, mid-strike', async t => {
 
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 45, 45, 45, 45, 45, 45],
     manualTimer,
   );

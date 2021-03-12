@@ -1,6 +1,3 @@
-/* eslint-disable no-use-before-define */
-// @ts-check
-
 import { Far } from '@agoric/marshal';
 import { amountMath } from '@agoric/ertp';
 

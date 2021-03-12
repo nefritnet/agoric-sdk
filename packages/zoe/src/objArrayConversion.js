@@ -1,5 +1,3 @@
-// @ts-check
-
 import { Data } from '@agoric/marshal';
 import { assert, details as X, q } from '@agoric/assert';
 

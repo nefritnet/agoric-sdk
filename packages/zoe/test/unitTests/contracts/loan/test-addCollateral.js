@@ -1,5 +1,3 @@
-// ts-check
-
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -54,7 +52,7 @@ test('makeAddCollateralInvitation', async t => {
     autoswapInstance,
     priceAuthority,
     getDebt,
-    mmr: makeRatio(150, loanKit.brand),
+    mmr: makeRatio(150n, loanKit.brand),
   };
   const addCollateralInvitation = makeAddCollateralInvitation(zcf, config);
 

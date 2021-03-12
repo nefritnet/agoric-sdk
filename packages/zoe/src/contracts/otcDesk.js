@@ -1,5 +1,3 @@
-// @ts-check
-
 import { E } from '@agoric/eventual-send';
 import { assert } from '@agoric/assert';
 import { Data, Far } from '@agoric/marshal';

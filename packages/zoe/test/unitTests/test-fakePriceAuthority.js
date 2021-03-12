@@ -1,9 +1,9 @@
-// @ts-check
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 import { E } from '@agoric/eventual-send';
+import { assert } from '@agoric/assert';
 import buildManualTimer from '../../tools/manualTimer';
 
 import { setup } from './setupBasicMints';
@@ -15,20 +15,21 @@ import {
   getQuoteValues,
 } from '../../src/contractSupport';
 
-const makeTestPriceAuthority = (amountMaths, priceList, timer) =>
+const makeTestPriceAuthority = (brands, priceList, timer) =>
   makeFakePriceAuthority({
-    mathIn: amountMaths.get('moola'),
-    mathOut: amountMaths.get('bucks'),
+    actualBrandIn: brands.get('moola'),
+    actualBrandOut: brands.get('bucks'),
     priceList,
     timer,
   });
 
 test('priceAuthority quoteAtTime', async t => {
-  const { moola, bucks, amountMaths, brands } = setup();
+  const { moola, bucks, brands } = setup();
   const bucksBrand = brands.get('bucks');
+  assert(bucksBrand);
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 55],
     manualTimer,
   );
@@ -49,11 +50,12 @@ test('priceAuthority quoteAtTime', async t => {
 });
 
 test('priceAuthority quoteGiven', async t => {
-  const { moola, amountMaths, brands, bucks } = setup();
+  const { moola, brands, bucks } = setup();
   const bucksBrand = brands.get('bucks');
+  assert(bucksBrand);
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 55],
     manualTimer,
   );
@@ -66,11 +68,12 @@ test('priceAuthority quoteGiven', async t => {
 });
 
 test('priceAuthority quoteWanted', async t => {
-  const { moola, bucks, amountMaths, brands } = setup();
+  const { moola, bucks, brands } = setup();
   const moolaBrand = brands.get('moola');
+  assert(moolaBrand);
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 55],
     manualTimer,
   );
@@ -84,12 +87,14 @@ test('priceAuthority quoteWanted', async t => {
 });
 
 test('priceAuthority paired quotes', async t => {
-  const { moola, bucks, amountMaths, brands } = setup();
+  const { moola, bucks, brands } = setup();
   const moolaBrand = brands.get('moola');
+  assert(moolaBrand);
   const bucksBrand = brands.get('bucks');
+  assert(bucksBrand);
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 55],
     manualTimer,
   );
@@ -110,10 +115,10 @@ test('priceAuthority paired quotes', async t => {
 });
 
 test('priceAuthority quoteWhenGTE', async t => {
-  const { moola, bucks, amountMaths } = setup();
+  const { moola, bucks, brands } = setup();
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [20, 30, 25, 40],
     manualTimer,
   );
@@ -136,10 +141,10 @@ test('priceAuthority quoteWhenGTE', async t => {
 });
 
 test('priceAuthority quoteWhenLT', async t => {
-  const { moola, bucks, amountMaths } = setup();
+  const { moola, bucks, brands } = setup();
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [40, 30, 29],
     manualTimer,
   );
@@ -161,10 +166,10 @@ test('priceAuthority quoteWhenLT', async t => {
 });
 
 test('priceAuthority quoteWhenGT', async t => {
-  const { moola, bucks, amountMaths } = setup();
+  const { moola, bucks, brands } = setup();
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [40, 30, 41],
     manualTimer,
   );
@@ -186,10 +191,10 @@ test('priceAuthority quoteWhenGT', async t => {
 });
 
 test('priceAuthority quoteWhenLTE', async t => {
-  const { moola, bucks, amountMaths } = setup();
+  const { moola, bucks, brands } = setup();
   const manualTimer = buildManualTimer(console.log, 0n);
   const priceAuthority = await makeTestPriceAuthority(
-    amountMaths,
+    brands,
     [40, 26, 50, 25],
     manualTimer,
   );

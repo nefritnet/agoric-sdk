@@ -1,5 +1,3 @@
-// @ts-check
-
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -46,7 +44,7 @@ const setupBorrow = async (
     { Loan: loanKit.mint.mintPayment(maxLoan) },
   );
 
-  const mmr = makeRatio(150, loanKit.brand);
+  const mmr = makeRatio(150n, loanKit.brand);
   const priceList = [2, 1, 1, 1];
 
   const priceAuthority = await makeFakePriceAuthority({
@@ -76,7 +74,7 @@ const setupBorrow = async (
     notifier: periodNotifier,
   } = makeNotifierKit();
 
-  const interestRate = makeRatio(5, loanKit.brand, BASIS_POINTS);
+  const interestRate = makeRatio(5n, loanKit.brand, BASIS_POINTS);
 
   const config = {
     lenderSeat,

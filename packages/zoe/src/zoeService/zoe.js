@@ -1,4 +1,3 @@
-// @ts-check
 import { makeWeakStore } from '@agoric/store';
 import { assert, details as X } from '@agoric/assert';
 import { E } from '@agoric/eventual-send';

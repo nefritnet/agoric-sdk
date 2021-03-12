@@ -1,4 +1,3 @@
-// @ts-check
 import '../../exported';
 
 // Eventually will be importable from '@agoric/zoe-contract-support'

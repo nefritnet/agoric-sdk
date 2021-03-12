@@ -5,6 +5,8 @@ import { E } from '@agoric/eventual-send';
 import test from 'ava';
 
 import { MathKind, makeIssuerKit } from '@agoric/ertp';
+import { assert } from '@agoric/assert';
+
 import { setup } from '../setupBasicMints';
 import {
   swap,
@@ -16,16 +18,7 @@ import {
 } from '../../../src/contractSupport';
 import { assertPayoutAmount } from '../../zoeTestHelpers';
 import { setupZCFTest } from './setupZcfTest';
-
-const makeOffer = async (zoe, zcf, proposal, payments) => {
-  let zcfSeat;
-  const getSeat = seat => {
-    zcfSeat = seat;
-  };
-  const invitation = await zcf.makeInvitation(getSeat, 'seat');
-  const userSeat = await E(zoe).offer(invitation, proposal, payments);
-  return { zcfSeat, userSeat };
-};
+import { makeOffer } from '../makeOffer';
 
 test(`zoeHelper with zcf - swap`, async t => {
   const {
@@ -96,7 +89,7 @@ test(`zoeHelper with zcf - swap no match`, async t => {
     },
     'mismatched offers',
   );
-  assertPayoutAmount(t, moolaIssuer, await aUserSeat.getPayout('A'), moola(0));
+  assertPayoutAmount(t, moolaIssuer, await aUserSeat.getPayout('A'), moola(0n));
   const seat1PayoutB = await aUserSeat.getPayout('B');
   assertPayoutAmount(t, simoleanIssuer, seat1PayoutB, simoleans(3));
   const seat2PayoutB = await bUserSeat.getPayout('B');
@@ -282,6 +275,7 @@ test(`zoeHelper with zcf - assertProposalShape`, async t => {
     { B: simoleanMint.mintPayment(simoleans(3)) },
   );
 
+  // @ts-ignore
   t.throws(() => assertProposalShape(zcfSeat, []), {
     message: 'Expected must be an non-array object',
   });
@@ -357,7 +351,7 @@ test(`zoeHelper w/zcf - swapExact`, async t => {
     await userSeatB.getPayout('C'),
     simoleans(3),
   );
-  assertPayoutAmount(t, moolaIssuer, await userSeatB.getPayout('D'), moola(0));
+  assertPayoutAmount(t, moolaIssuer, await userSeatB.getPayout('D'), moola(0n));
   t.deepEqual(Object.getOwnPropertyNames(await userSeatB.getPayouts()), [
     'D',
     'C',
@@ -393,7 +387,7 @@ test(`zoeHelper w/zcf - swapExact w/shortage`, async t => {
     message: 'The reallocation failed to conserve rights.',
   });
   t.truthy(zcfSeatA.hasExited(), 'fail right');
-  assertPayoutAmount(t, moolaIssuer, await userSeatA.getPayout('A'), moola(0));
+  assertPayoutAmount(t, moolaIssuer, await userSeatA.getPayout('A'), moola(0n));
   assertPayoutAmount(
     t,
     simoleanIssuer,
@@ -439,7 +433,7 @@ test(`zoeHelper w/zcf - swapExact w/excess`, async t => {
     message: 'The reallocation failed to conserve rights.',
   });
   t.truthy(zcfSeatA.hasExited(), 'fail right');
-  assertPayoutAmount(t, moolaIssuer, await userSeatA.getPayout('A'), moola(0));
+  assertPayoutAmount(t, moolaIssuer, await userSeatA.getPayout('A'), moola(0n));
   assertPayoutAmount(
     t,
     simoleanIssuer,
@@ -519,6 +513,7 @@ test(`zcf/zoeHelper - assertProposalShape w/bad Expected`, async t => {
     { B: simoleanMint.mintPayment(simoleans(3)) },
   );
 
+  // @ts-ignore
   t.throws(() => assertProposalShape(zcfSeat, { give: { B: moola(3) } }), {
     message: `The value of the expected record must be null but was (an object)`,
   });

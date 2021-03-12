@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
 
 import {

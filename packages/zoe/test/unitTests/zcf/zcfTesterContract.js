@@ -1,5 +1,3 @@
-// @ts-check
-
 import { E } from '@agoric/eventual-send';
 import '../../../exported';
 

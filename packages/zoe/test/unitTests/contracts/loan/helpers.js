@@ -1,4 +1,5 @@
 /* global __dirname */
+
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -202,7 +203,7 @@ export const makeAutoswapInstance = async (
   );
 
   const liquidityIssuer = await E(publicFacet).getLiquidityIssuer();
-  const liquidityBrand = E(liquidityIssuer).getBrand();
+  const liquidityBrand = await E(liquidityIssuer).getBrand();
 
   const proposal = harden({
     give: initialLiquidityKeywordRecord,

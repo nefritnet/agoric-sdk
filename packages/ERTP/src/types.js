@@ -2,16 +2,6 @@
 /// <reference types="ses"/>
 
 /**
- * @template T
- * @typedef {import('@agoric/promise-kit').ERef<T>} ERef
- */
-
-/**
- * @typedef {import('@agoric/marshal').InterfaceSpec} InterfaceSpec
- * @typedef {import('@agoric/marshal').GetInterfaceOf} GetInterfaceOf
- */
-
-/**
  * @typedef {Object} Amount
  * Amounts are descriptions of digital assets, answering the questions
  * "how much" and "of what kind". Amounts are values labeled with a brand.
@@ -41,6 +31,13 @@
  */
 
 /**
+ * @callback MakeEmpty
+ * @param {Brand} brand
+ * @param {AmountMathKind=} mathKind
+ * @returns {Amount}
+ */
+
+/**
  * @typedef {Object} AmountMath
  * Logic for manipulating amounts.
  *
@@ -58,7 +55,7 @@
  * @property {(amount: Amount, brand: Brand) => Value} getValue
  * Extract and return the value.
  *
- * @property {(brand: Brand, string: mathKind=) => Amount} makeEmpty
+ * @property {MakeEmpty} makeEmpty
  * Return the amount representing an empty amount. This is the
  * identity element for MathHelpers.add and MatHelpers.subtract.
  *
@@ -134,6 +131,20 @@
  */
 
 /**
+ * @callback IssuerBurn
+ * @param {PaymentP} payment
+ * @param {Amount=} optAmount
+ * @returns {Promise<Amount>}
+ */
+
+/**
+ * @callback IssuerClaim
+ * @param {PaymentP} payment
+ * @param {Amount=} optAmount
+ * @returns {Promise<Payment>}
+ */
+
+/**
  * @typedef {Object} Issuer
  * The issuer cannot mint a new amount, but it can create empty purses and
  * payments. The issuer can also transform payments (splitting payments,
@@ -164,7 +175,7 @@
  *
  * If the payment is a promise, the operation will proceed upon resolution.
  *
- * @property {(payment: PaymentP, optAmount: Amount=) => Promise<Amount>} burn
+ * @property {IssuerBurn} burn
  * Burn all of the digital assets in the payment. `optAmount` is optional.
  * If `optAmount` is present, the code will insist that the amount of
  * the digital assets in the payment is equal to `optAmount`, to
@@ -172,7 +183,7 @@
  *
  * If the payment is a promise, the operation will proceed upon resolution.
  *
- * @property {(payment: PaymentP, optAmount: Amount=) => Promise<Payment>} claim
+ * @property {IssuerClaim} claim
  * Transfer all digital assets from the payment to a new payment and
  * delete the original. `optAmount` is optional.
  * If `optAmount` is present, the code will insist that the amount of
@@ -238,13 +249,27 @@
  */
 
 /**
+ * @callback DepositFacetReceive
+ * @param {Payment} payment
+ * @param {Amount=} optAmount
+ * @returns {Amount}
+ */
+
+/**
  * @typedef {Object} DepositFacet
- * @property {(payment: Payment, optAmount: Amount=) => Amount} receive
+ * @property {DepositFacetReceive} receive
  * Deposit all the contents of payment into the purse that made this facet,
  * returning the amount. If the optional argument `optAmount` does not equal the
  * amount of digital assets in the payment, throw an error.
  *
  * If payment is a promise, throw an error.
+ */
+
+/**
+ * @callback PurseDeposit
+ * @param {Payment} payment
+ * @param {Amount=} optAmount
+ * @returns {Amount}
  */
 
 /**
@@ -266,7 +291,7 @@
  * @property {() => Notifier<Amount>} getCurrentAmountNotifier
  * Get a lossy notifier for changes to this purse's balance.
  *
- * @property {(payment: Payment, optAmount: Amount=) => Amount} deposit
+ * @property {PurseDeposit} deposit
  * Deposit all the contents of payment into this purse, returning the
  * amount. If the optional argument `optAmount` does not equal the
  * amount of digital assets in the payment, throw an error.
@@ -304,7 +329,7 @@
 
 /**
  * @template V
- * @typedef {Object} MathHelpers<T>
+ * @typedef {Object} MathHelpers<V>
  * All of the difference in how digital asset amount are manipulated can be reduced to
  * the behavior of the math on values. We extract this
  * custom logic into mathHelpers. MathHelpers are about value

@@ -1,5 +1,3 @@
-// @ts-check
-
 import { makeIssuerKit, amountMath, MathKind } from '@agoric/ertp';
 import { makeZoe } from '../../src/zoeService/zoe';
 import fakeVatAdmin from '../../src/contractFacet/fakeVatAdmin';

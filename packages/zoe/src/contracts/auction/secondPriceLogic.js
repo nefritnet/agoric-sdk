@@ -1,5 +1,3 @@
-// @ts-check
-
 import { amountMath } from '@agoric/ertp';
 
 export const calcWinnerAndClose = (zcf, sellSeat, bidSeats) => {

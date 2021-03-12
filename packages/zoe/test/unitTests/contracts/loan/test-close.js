@@ -1,4 +1,3 @@
-// ts-check
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies

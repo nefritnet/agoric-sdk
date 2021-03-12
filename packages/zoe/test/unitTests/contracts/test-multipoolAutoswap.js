@@ -28,7 +28,7 @@ test('multipoolAutoSwap with valid offers', async t => {
   const { moolaR, simoleanR, moola, simoleans } = setup();
   const zoe = makeZoe(fakeVatAdmin);
   const invitationIssuer = zoe.getInvitationIssuer();
-  const invitationBrand = E(invitationIssuer).getBrand();
+  const invitationBrand = await E(invitationIssuer).getBrand();
 
   // Set up central token
   const centralR = makeIssuerKit('central');
@@ -201,7 +201,7 @@ test('multipoolAutoSwap with valid offers', async t => {
 
   t.deepEqual(
     await moolaR.issuer.getAmountOf(bobMoolaPayout1),
-    moola(0),
+    moola(0n),
     `bob gets no moola back`,
   );
   t.deepEqual(
@@ -456,7 +456,7 @@ test('multipoolAutoSwap with valid offers', async t => {
   t.deepEqual(
     await E(bobPublicFacet).getPoolAllocation(moolaR.brand),
     harden({
-      Secondary: moola(0),
+      Secondary: moola(0n),
       Central: centralTokens(0),
       Liquidity: moolaLiquidity(50),
     }),
@@ -468,7 +468,7 @@ test('multipoolAutoSwap get detailed prices', async t => {
   const { moolaR, simoleanR, moola, simoleans } = setup();
   const zoe = makeZoe(fakeVatAdmin);
   const invitationIssuer = zoe.getInvitationIssuer();
-  const invitationBrand = E(invitationIssuer).getBrand();
+  const invitationBrand = await E(invitationIssuer).getBrand();
 
   // Set up central token
   const centralR = makeIssuerKit('central');
@@ -797,7 +797,7 @@ test('multipoolAutoSwap jig - addLiquidity', async t => {
   // Alice adds liquidity with an out-of-balance offer -- too much moola
   const liqDetails2 = {
     cAmount: centralTokens(100),
-    sAmount: moola(200),
+    sAmount: moola(200n),
     lAmount: moolaLiquidity(100),
   };
 
@@ -855,8 +855,10 @@ test('multipoolAutoSwap jig - check liquidity', async t => {
     installation,
     harden({ Central: centralR.issuer }),
   );
-  /** @type {MultipoolAutoswapPublicFacet} */
-  const { publicFacet } = startRecord;
+
+  const {
+    /** @type {MultipoolAutoswapPublicFacet} */ publicFacet,
+  } = startRecord;
   const moolaLiquidityIssuer = await E(publicFacet).addPool(
     moolaR.issuer,
     'Moola',
@@ -911,7 +913,7 @@ test('multipoolAutoSwap jig - check liquidity', async t => {
   );
   moolaPoolState = updatePoolState(moolaPoolState, initLiquidityExpected);
   assertPayoutDeposit(t, centralP, centralPurse, centralTokens(0));
-  assertPayoutDeposit(t, secondaryP, moolaPurse, moola(0));
+  assertPayoutDeposit(t, secondaryP, moolaPurse, moola(0n));
   assertPayoutDeposit(t, liquidityP, purses[1], moolaLiquidity(10000));
 
   const liquidityIssuer = await E(publicFacet).getLiquidityIssuer(moolaR.brand);
@@ -988,8 +990,8 @@ test('multipoolAutoSwap jig - swapOut', async t => {
     installation,
     harden({ Central: centralR.issuer }),
   );
-  /** @type {MultipoolAutoswapPublicFacet} */
-  const { publicFacet } = startRecord;
+
+  const { /** @type {MultipoolAutoswapPublicFacet} */ publicFacet } = startRecord;
   const moolaLiquidityIssuer = await E(publicFacet).addPool(
     moolaR.issuer,
     'Moola',
@@ -1683,8 +1685,9 @@ test('multipoolAutoSwap jig - insufficient', async t => {
     moolaR.issuer,
     'Moola',
   );
+  const moolaLiquidityBrand = await E(moolaLiquidityIssuer).getBrand();
 
-  const moolaLiquidity = amountMath.make;
+  const moolaLiquidity = value => amountMath.make(value, moolaLiquidityBrand);
   const mIssuerKeywordRecord = {
     Secondary: moolaR.issuer,
     Liquidity: moolaLiquidityIssuer,
@@ -1733,7 +1736,7 @@ test('multipoolAutoSwap jig - insufficient', async t => {
   // provide insufficient moola; trade fails
   const seat = await alice.offerAndTrade(
     centralTokens(gain),
-    moola(200),
+    moola(200n),
     false,
   );
   await t.throwsAsync(
@@ -1742,6 +1745,6 @@ test('multipoolAutoSwap jig - insufficient', async t => {
     `shouldn't have been able to trade`,
   );
   const { In: refund, Out: payout } = await seat.getPayouts();
-  t.deepEqual(await moolaR.issuer.getAmountOf(refund), moola(200));
+  t.deepEqual(await moolaR.issuer.getAmountOf(refund), moola(200n));
   t.deepEqual(await centralR.issuer.getAmountOf(payout), centralTokens(0));
 });

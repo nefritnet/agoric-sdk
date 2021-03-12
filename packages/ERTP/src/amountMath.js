@@ -3,11 +3,12 @@
 import { assert, details as X } from '@agoric/assert';
 import { mustBeComparable } from '@agoric/same-structure';
 import { passStyleOf, REMOTE_STYLE } from '@agoric/marshal';
-import { Nat, isNat } from '@agoric/nat';
+import { isNat } from '@agoric/nat';
 
 import './types';
 import natMathHelpers from './mathHelpers/natMathHelpers';
 import setMathHelpers from './mathHelpers/setMathHelpers';
+import { isSetValue, isNatValue } from './typeGuards';
 
 // We want an enum, but narrowed to the AmountMathKind type.
 /**
@@ -59,38 +60,41 @@ harden(MathKind);
  * brand. The issuer and the brand mutually validate each other.
  */
 
-/** @type {{ nat: NatMathHelpers, set: SetMathHelpers, strSet: SetMathHelpers }} */
+/** @type {{ nat: NatMathHelpers, set: SetMathHelpers }} */
 const helpers = {
   nat: natMathHelpers,
   set: setMathHelpers,
-  strSet: setMathHelpers,
 };
 
 /**
- * @type {(value: NatValue | SetValue) => SetMathHelpers | NatMathHelpers }
+ * @param {Value} value
+ * @returns {NatMathHelpers | SetMathHelpers}
  */
 const getHelpersFromValue = value => {
-  if (Array.isArray(value)) {
+  if (isSetValue(value)) {
     return setMathHelpers;
   }
-  assert(
-    typeof Nat(value) === 'bigint',
-    X`value ${value} must be a bigint or an array`,
-  );
-  return natMathHelpers;
+  if (isNatValue(value)) {
+    return natMathHelpers;
+  }
+  assert.fail(X`value ${value} must be a bigint or an array`);
 };
 
 /** @type {(amount: Amount) => AmountMathKind} */
 const getMathKind = amount => {
-  if (Array.isArray(amount.value)) {
+  if (isSetValue(amount.value)) {
     return 'set';
   }
-  return 'nat';
+  if (isNatValue(amount.value)) {
+    return 'nat';
+  }
+  assert.fail(X`value ${amount.value} must be a bigint or an array`);
 };
 
-/** @type {(amount: Amount ) => NatMathHelpers | SetMathHelpers} */
+/**
+ * @type {(amount: Amount ) => NatMathHelpers | SetMathHelpers }
+ */
 const getHelpersFromAmount = amount => {
-  // @ts-ignore
   return getHelpersFromValue(amount.value);
 };
 

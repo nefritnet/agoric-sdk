@@ -1,5 +1,3 @@
-// @ts-check
-
 import { assert, details as X } from '@agoric/assert';
 import { Far } from '@agoric/marshal';
 import { amountMath } from '@agoric/ertp';

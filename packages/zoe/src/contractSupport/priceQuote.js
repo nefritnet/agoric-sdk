@@ -1,5 +1,3 @@
-// @ts-check
-
 // PriceAuthorities return quotes as a pair of an amount and a payment, both
 // with the same value. The underlying amount wraps amountIn, amountOut, timer
 // and timestamp. The payment is issued by the quoteIssuer to support veracity

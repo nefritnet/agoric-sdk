@@ -1,5 +1,3 @@
-// @ts-check
-
 import { makeIssuerKit, MathKind, amountMath } from '@agoric/ertp';
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
@@ -16,10 +14,10 @@ import { assert } from '@agoric/assert';
  * specification of what is being sold, such as:
  * {
  *   customValueProperties: { ...arbitrary },
- *   count: 3,
+ *   count: 3n,
  *   moneyIssuer: moolaIssuer,
  *   sellItemsInstallationHandle,
- *   pricePerItem: moolaAmountMath.make(20),
+ *   pricePerItem: amountMath.make(20n, moolaBrand),
  * }
  * The payouts are returned as an offerResult in the `outcome`, and an API that
  * allows selling the tickets that were produced. You can reuse the ticket maker

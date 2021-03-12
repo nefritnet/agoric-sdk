@@ -1,5 +1,3 @@
-// @ts-check
-
 import { E } from '@agoric/eventual-send';
 import { assert, details as X } from '@agoric/assert';
 import { MathKind, amountMath } from '@agoric/ertp/src/amountMath';
@@ -63,7 +61,7 @@ export const makeAddPool = (zcf, isSecondary, initPool, centralBrand) => {
 
     const assertPoolInitialized = pool =>
       assert(
-        !pool.getAmountMath().isEmpty(pool.getSecondaryAmount()),
+        !amountMath.isEmpty(pool.getSecondaryAmount()),
         X`pool not initialized`,
       );
 
@@ -102,6 +100,7 @@ export const makeAddPool = (zcf, isSecondary, initPool, centralBrand) => {
           inputAmount.brand,
           outputBrand,
         );
+        assert.typeof(inputAmount.value, 'bigint');
         const valueOut = getInputPrice(
           inputAmount.value,
           inputReserve,
@@ -124,6 +123,7 @@ export const makeAddPool = (zcf, isSecondary, initPool, centralBrand) => {
           inputBrand,
           outputAmount.brand,
         );
+        assert.typeof(outputAmount.value, 'bigint');
         const valueIn = getOutputPrice(
           outputAmount.value,
           inputReserve,
@@ -143,14 +143,20 @@ export const makeAddPool = (zcf, isSecondary, initPool, centralBrand) => {
 
         const userAllocation = zcfSeat.getCurrentAllocation();
         const secondaryIn = userAllocation.Secondary;
+        const centralAmount = pool.getCentralAmount();
+        const secondaryAmount = pool.getSecondaryAmount();
+        assert.typeof(userAllocation.Central.value, 'bigint');
+        assert.typeof(centralAmount.value, 'bigint');
+        assert.typeof(secondaryAmount.value, 'bigint');
+        assert.typeof(secondaryIn.value, 'bigint');
 
         // To calculate liquidity, we'll need to calculate alpha from the primary
         // token's value before, and the value that will be added to the pool
         const secondaryOut = amountMath.make(
           calcSecondaryRequired(
             userAllocation.Central.value,
-            pool.getCentralAmount().value,
-            pool.getSecondaryAmount().value,
+            centralAmount.value,
+            secondaryAmount.value,
             secondaryIn.value,
           ),
           secondaryBrand,

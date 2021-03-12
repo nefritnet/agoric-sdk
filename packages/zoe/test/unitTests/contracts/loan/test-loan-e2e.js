@@ -1,5 +1,5 @@
 /* global __dirname */
-// ts-check
+
 import '../../../../exported';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -59,12 +59,12 @@ test('loan - lend - exit before borrow', async t => {
   const { notifier: periodNotifier } = makeNotifierKit();
 
   const terms = {
-    mmr: makeRatio(150, loanKit.brand),
+    mmr: makeRatio(150n, loanKit.brand),
     autoswapInstance,
     priceAuthority,
     periodNotifier,
-    interestRate: 5,
-    interestPeriod: 10,
+    interestRate: 5n,
+    interestPeriod: 10n,
   };
 
   const { creatorInvitation: lendInvitation, instance } = await E(

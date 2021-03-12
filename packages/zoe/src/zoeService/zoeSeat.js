@@ -1,5 +1,3 @@
-// @ts-check
-
 import { makePromiseKit } from '@agoric/promise-kit';
 import { makeNotifierKit } from '@agoric/notifier';
 import { assert } from '@agoric/assert';
@@ -45,6 +43,7 @@ export const makeZoeSeatAdminKit = (
     /** @type {PaymentPKeywordRecord} */
     const payout = objectMap(currentAllocation, ([keyword, payoutAmount]) => {
       const purse = brandToPurse.get(payoutAmount.brand);
+      // @ts-ignore
       return [keyword, E(purse).withdraw(payoutAmount)];
     });
     harden(payout);

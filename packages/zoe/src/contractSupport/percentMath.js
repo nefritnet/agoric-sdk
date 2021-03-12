@@ -1,5 +1,3 @@
-// @ts-check
-
 import './types';
 import { assert, details as X } from '@agoric/assert';
 import { Far } from '@agoric/marshal';
@@ -31,6 +29,10 @@ function makePercent(value, brand, base = 100n) {
   Nat(value);
   return Far('percent', {
     scale: amount => {
+      assert(
+        amount.brand === brand,
+        `amount must have the same brand as the percent`,
+      );
       amount = amountMath.coerce(amount, brand);
       return amountMath.make(
         floorDivide(multiply(amount.value, value), base),
@@ -51,7 +53,12 @@ harden(makePercent);
 // dividing two amounts of the same brand.
 /** @type {CalculatePercent} */
 function calculatePercent(numerator, denominator, base = 100n) {
-  amountMath.coerce(numerator, denominator.brand);
+  assert(
+    numerator.brand === denominator.brand,
+    `Dividing amounts of different brands doesn't produce a percent.`,
+  );
+  numerator = amountMath.coerce(numerator, denominator.brand);
+  denominator = amountMath.coerce(denominator, numerator.brand);
 
   const value = floorDivide(multiply(base, numerator.value), denominator.value);
   return makePercent(value, numerator.brand, base);

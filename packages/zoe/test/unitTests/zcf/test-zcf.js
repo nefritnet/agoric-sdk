@@ -1,4 +1,3 @@
-// @ts-check
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -6,7 +5,8 @@ import test from 'ava';
 
 import { MathKind, amountMath } from '@agoric/ertp';
 import { E } from '@agoric/eventual-send';
-import { assert, details as X } from '@agoric/assert';
+import { details as X } from '@agoric/assert';
+import { makeOffer } from '../makeOffer';
 
 import { setup } from '../setupBasicMints';
 import buildManualTimer from '../../../tools/manualTimer';
@@ -30,21 +30,18 @@ const testTerms = async (t, zcf, expected) => {
   // Note that the amountMath are made locally within Zoe, so they
   // will not match the amountMath gotten from the setup code.
   const zcfTerms = zcf.getTerms();
-  const zcfTermsMinusAmountMath = { ...zcfTerms, maths: {} };
-  const expectedMinusAmountMath = { ...expected, maths: {} };
-  t.deepEqual(zcfTermsMinusAmountMath, expectedMinusAmountMath);
+  t.deepEqual(zcfTerms, expected);
 };
 
 test(`zcf.getTerms - empty`, async t => {
   const { zcf } = await setupZCFTest();
-  await testTerms(t, zcf, { brands: {}, issuers: {}, maths: {} });
+  await testTerms(t, zcf, { brands: {}, issuers: {} });
 });
 
 test(`zcf.getTerms - custom`, async t => {
   const expected = {
     brands: {},
     issuers: {},
-    maths: {},
     whatever: 'whatever',
   };
   const issuerKeywordRecord = undefined;
@@ -59,7 +56,6 @@ test(`zcf.getTerms - standard overwrites custom`, async t => {
   const expected = {
     brands: {},
     issuers: {},
-    maths: {},
   };
   const issuerKeywordRecord = undefined;
   const customTerms = {
@@ -160,9 +156,7 @@ test(`zcf.saveIssuer & zoe.getTerms`, async t => {
   await zcf.saveIssuer(bucksKit.issuer, 'C');
 
   const zoeTerms = await E(zoe).getTerms(instance);
-  const zoeTermsMinusAmountMath = { ...zoeTerms, maths: {} };
-  const expectedMinusAmountMath = { ...expected, maths: {} };
-  t.deepEqual(zoeTermsMinusAmountMath, expectedMinusAmountMath);
+  t.deepEqual(zoeTerms, expected);
 });
 
 test(`zcf.saveIssuer - bad issuer`, async t => {
@@ -529,24 +523,6 @@ test(`zcf.makeZCFMint - displayInfo`, async t => {
   t.is(issuerRecord.brand.getDisplayInfo().decimalPlaces, 3);
 });
 
-/**
- * @param {ZoeService} zoe
- * @param {ContractFacet} zcf
- * @param {Proposal=} proposal
- * @param {PaymentPKeywordRecord=} payments
- * @returns {Promise<{zcfSeat: ZCFSeat, userSeat: UserSeat}>}
- */
-const makeOffer = async (zoe, zcf, proposal, payments) => {
-  let zcfSeat;
-  const getSeat = seat => {
-    zcfSeat = seat;
-  };
-  const invitation = await zcf.makeInvitation(getSeat, 'seat');
-  const userSeat = await E(zoe).offer(invitation, proposal, payments);
-  assert(zcfSeat);
-  return { zcfSeat, userSeat };
-};
-
 const similarToNormalZCFSeat = async (t, emptySeat, normalSeat) => {
   // Note: not exhaustive
   t.deepEqual(Object.keys(emptySeat), Object.keys(normalSeat));
@@ -663,7 +639,7 @@ test(`zcfSeat.isOfferSafe from zcf.makeEmptySeatKit`, async t => {
   // Anything is offer safe with no want or give
   // @ts-ignore deliberate invalid arguments for testing
   t.truthy(zcfSeat.isOfferSafe());
-  t.truthy(zcfSeat.isOfferSafe({ Moola: moola(0) }));
+  t.truthy(zcfSeat.isOfferSafe({ Moola: moola(0n) }));
   t.truthy(zcfSeat.isOfferSafe({ Moola: moola(10) }));
 });
 
@@ -1082,7 +1058,7 @@ test(`zcf.reallocate 3 seats, rights conserved`, async t => {
 
   const staging1 = zcfSeat1.stage({
     A: simoleans(2),
-    B: moola(0),
+    B: moola(0n),
   });
 
   const staging2 = zcfSeat2.stage({
@@ -1098,7 +1074,7 @@ test(`zcf.reallocate 3 seats, rights conserved`, async t => {
   zcf.reallocate(staging1, staging2, staging3);
   t.deepEqual(zcfSeat1.getCurrentAllocation(), {
     A: simoleans(2),
-    B: moola(0),
+    B: moola(0n),
   });
 
   t.deepEqual(zcfSeat2.getCurrentAllocation(), {
@@ -1145,7 +1121,7 @@ test(`zcf.reallocate 3 seats, rights NOT conserved`, async t => {
 
   const staging1 = zcfSeat1.stage({
     A: simoleans(100),
-    B: moola(0),
+    B: moola(0n),
   });
 
   const staging2 = zcfSeat2.stage({
@@ -1167,10 +1143,10 @@ test(`zcf.reallocate 3 seats, rights NOT conserved`, async t => {
     B: moola(3),
   });
   t.deepEqual(zcfSeat2.getCurrentAllocation(), {
-    Whatever: moola(0),
+    Whatever: moola(0n),
     Whatever2: simoleans(2),
   });
-  t.deepEqual(zcfSeat3.getCurrentAllocation(), { Whatever: moola(0) });
+  t.deepEqual(zcfSeat3.getCurrentAllocation(), { Whatever: moola(0n) });
 });
 
 test(`zcf.shutdown - userSeat exits`, async t => {

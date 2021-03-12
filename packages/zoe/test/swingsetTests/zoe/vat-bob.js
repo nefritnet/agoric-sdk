@@ -3,18 +3,15 @@ import { Far } from '@agoric/marshal';
 import { assert, details as X } from '@agoric/assert';
 import { sameStructure } from '@agoric/same-structure';
 import { amountMath } from '@agoric/ertp';
+import { assertSetValue } from '@agoric/ertp/src/typeGuards';
 
 import { showPurseBalance, setupIssuers } from '../helpers';
 
 const build = async (log, zoe, issuers, payments, installations, timer) => {
-  const {
-    moola,
-    simoleans,
-    bucks,
-    purses,
-    moolaAmountMath,
-    simoleanAmountMath,
-  } = await setupIssuers(zoe, issuers);
+  const { moola, simoleans, bucks, purses, brands } = await setupIssuers(
+    zoe,
+    issuers,
+  );
   const [moolaPurseP, simoleanPurseP, bucksPurseP] = purses;
   const [moolaPayment, simoleanPayment] = payments;
   const [moolaIssuer, simoleanIssuer, bucksIssuer] = issuers;
@@ -95,13 +92,13 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
         X`wrong invitation`,
       );
       assert(
-        moolaAmountMath.isEqual(
+        amountMath.isEqual(
           optionValue[0].underlyingAssets.UnderlyingAsset,
           moola(3),
         ),
       );
       assert(
-        simoleanAmountMath.isEqual(
+        amountMath.isEqual(
           optionValue[0].strikePrice.StrikePrice,
           simoleans(7),
         ),
@@ -161,14 +158,14 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
         X`wrong invitation`,
       );
       assert(
-        moolaAmountMath.isEqual(
+        amountMath.isEqual(
           optionValue[0].underlyingAssets.UnderlyingAsset,
           moola(3),
         ),
         X`wrong underlying asset`,
       );
       assert(
-        simoleanAmountMath.isEqual(
+        amountMath.isEqual(
           optionValue[0].strikePrice.StrikePrice,
           simoleans(7),
         ),
@@ -464,7 +461,7 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
       // Bob looks up how much moola he can get for 3 simoleans. It's 5
       const moolaProceeds = await E(publicFacet).getInputPrice(
         simoleans(3),
-        moola(0).brand,
+        moola(0n).brand,
       );
       log(`moola proceeds `, moolaProceeds);
 
@@ -512,6 +509,7 @@ const build = async (log, zoe, issuers, payments, installations, timer) => {
       const availableTickets = await E(publicFacet).getAvailableItems();
       log('availableTickets: ', availableTickets);
       // find the value corresponding to ticket #1
+      assertSetValue(availableTickets.value);
       const ticket1Value = availableTickets.value.find(
         ticket => ticket.number === 1,
       );

@@ -1,5 +1,3 @@
-// @ts-check
-
 import { Far } from '@agoric/marshal';
 import makeStore from '@agoric/store';
 import '../../exported';

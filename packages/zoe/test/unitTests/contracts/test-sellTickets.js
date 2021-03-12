@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -6,6 +7,7 @@ import test from 'ava';
 
 import bundleSource from '@agoric/bundle-source';
 import { makeIssuerKit, amountMath } from '@agoric/ertp';
+import { assertSetValue } from '@agoric/ertp/src/typeGuards';
 import { E } from '@agoric/eventual-send';
 import fakeVatAdmin from '../../../src/contractFacet/fakeVatAdmin';
 
@@ -26,9 +28,7 @@ test(`mint and sell tickets for multiple shows`, async t => {
   const sellItemsBundle = await bundleSource(sellItemsRoot);
   const sellItemsInstallation = await E(zoe).install(sellItemsBundle);
 
-  const { issuer: moolaIssuer, amountMath: moolaAmountMath } = makeIssuerKit(
-    'moola',
-  );
+  const { issuer: moolaIssuer, brand: moolaBrand } = makeIssuerKit('moola');
 
   const { creatorFacet: ticketMaker } = await E(zoe).startInstance(
     mintAndSellNFTInstallation,
@@ -43,7 +43,7 @@ test(`mint and sell tickets for multiple shows`, async t => {
     count: 3,
     moneyIssuer: moolaIssuer,
     sellItemsInstallation,
-    pricePerItem: moolaAmountMath.make(20),
+    pricePerItem: amountMath.make(20n, moolaBrand),
   });
   t.is(
     await sellItemsCreatorSeat.getOfferResult(),
@@ -90,7 +90,7 @@ test(`mint and sell tickets for multiple shows`, async t => {
     count: 2,
     moneyIssuer: moolaIssuer,
     sellItemsInstallation,
-    pricePerItem: moolaAmountMath.make(20),
+    pricePerItem: amountMath.make(20n, moolaBrand),
   });
   const sellItemsPublicFacet2 = await E(zoe).getPublicFacet(sellItemsInstance2);
   const ticketsForSale2 = await E(sellItemsPublicFacet2).getAvailableItems();
@@ -139,8 +139,10 @@ test(`mint and sell opera tickets`, async t => {
   const {
     mint: moolaMint,
     issuer: moolaIssuer,
-    amountMath: { make: moola },
+    brand: moolaBrand,
   } = makeIssuerKit('moola');
+
+  const moola = value => amountMath.make(value, moolaBrand);
 
   const zoe = makeZoe(fakeVatAdmin);
 
@@ -210,6 +212,7 @@ test(`mint and sell opera tickets`, async t => {
       3,
       'Alice should see 3 available tickets',
     );
+    assertSetValue(availableTickets.value);
     t.truthy(
       availableTickets.value.find(ticket => ticket.number === 1),
       `availableTickets contains ticket number 1`,
@@ -433,6 +436,7 @@ test(`mint and sell opera tickets`, async t => {
       ticketSalesPublicFacet,
     ).getAvailableItems();
 
+    assertSetValue(availableTickets.value);
     // Bob sees the currently available tickets
     t.is(
       availableTickets.value.length,

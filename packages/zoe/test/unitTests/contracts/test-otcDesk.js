@@ -1,4 +1,5 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -217,7 +218,7 @@ const makeBob = (
         t,
         moolaIssuer,
         E(offerExpiredSeat).getPayout('Whatever2'),
-        moola(0),
+        moola(0n),
         'bob moola',
       );
       await assertPayoutAmount(

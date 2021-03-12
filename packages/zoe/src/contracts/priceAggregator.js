@@ -1,4 +1,3 @@
-// @ts-check
 import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
 import { makeNotifierKit } from '@agoric/notifier';
@@ -223,6 +222,8 @@ const start = async zcf => {
         notifier,
         quoteIssuer: quoteKit.issuer,
         timer,
+        actualBrandIn: brandIn,
+        actualBrandOut: brandOut,
       });
       ({ priceAuthority, adminFacet: priceAuthorityAdmin } = paKit);
     },

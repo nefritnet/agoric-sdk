@@ -1,9 +1,9 @@
 /* global __dirname */
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@agoric/install-metering-and-ses';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import test from 'ava';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { buildVatController, buildKernelBundles } from '@agoric/swingset-vat';
 import bundleSource from '@agoric/bundle-source';
 

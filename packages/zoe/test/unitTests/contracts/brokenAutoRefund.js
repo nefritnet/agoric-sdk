@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * This is a a broken contact to test zoe's error handling
  *
@@ -11,7 +9,9 @@ const start = zcf => {
     return `The offer was accepted`;
   };
   const makeRefundInvitation = () => zcf.makeInvitation(refund, 'getRefund');
-  // should be makeRefundInvitation(). Intentionally wrong to provoke an error.
+  // should be makeRefundInvitation(). Intentionally wrong to provoke
+  // an error.
+  // @ts-ignore
   return { creatorInvitation: makeRefundInvitation };
 };
 

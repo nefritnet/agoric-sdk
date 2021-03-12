@@ -2,6 +2,7 @@ import { E } from '@agoric/eventual-send';
 import { Far } from '@agoric/marshal';
 import { assert, details as X } from '@agoric/assert';
 import { makePromiseKit } from '@agoric/promise-kit';
+import { amountMath } from '@agoric/ertp';
 
 import '../../exported';
 
@@ -13,17 +14,17 @@ import '../../exported';
  */
 
 /** @type {CompareAmount} */
-const isLT = (math, amountOut, amountLimit) =>
-  !math.isGTE(amountOut, amountLimit);
+const isLT = (amountOut, amountLimit) =>
+  !amountMath.isGTE(amountOut, amountLimit);
 
 /** @type {CompareAmount} */
-const isLTE = (math, amount, amountLimit) => math.isGTE(amountLimit, amount);
+const isLTE = (amount, amountLimit) => amountMath.isGTE(amountLimit, amount);
 
 /** @type {CompareAmount} */
-const isGTE = (math, amount, amountLimit) => math.isGTE(amount, amountLimit);
+const isGTE = (amount, amountLimit) => amountMath.isGTE(amount, amountLimit);
 
 /** @type {CompareAmount} */
-const isGT = (math, amount, amountLimit) => !math.isGTE(amountLimit, amount);
+const isGT = (amount, amountLimit) => !amountMath.isGTE(amountLimit, amount);
 
 /**
  * @typedef {Object} OnewayPriceAuthorityOptions
@@ -31,11 +32,13 @@ const isGT = (math, amount, amountLimit) => !math.isGTE(amountLimit, amount);
  * @property {Notifier<PriceQuote>} notifier
  * @property {TimerService} timer
  * @property {PriceQuoteCreate} createQuote
+ * @property {Brand} actualBrandIn
+ * @property {Brand} actualBrandOut
  */
 
 /**
  * @callback Trigger
- * @param {Timestamp} timestamp
+ * @param {Function} createInstantQuote
  * @returns {Promise<void>}
  */
 
@@ -44,10 +47,17 @@ const isGT = (math, amount, amountLimit) => !math.isGTE(amountLimit, amount);
  * @returns {PriceAuthorityKit}
  */
 export function makeOnewayPriceAuthorityKit(opts) {
-  const { timer, createQuote, mathIn, mathOut, quoteIssuer, notifier } = opts;
+  const {
+    timer,
+    createQuote,
+    actualBrandIn,
+    actualBrandOut,
+    quoteIssuer,
+    notifier,
+  } = opts;
 
-  const paBrandIn = mathIn.getBrand();
-  const paBrandOut = mathOut.getBrand();
+  const paBrandIn = actualBrandIn;
+  const paBrandOut = actualBrandOut;
 
   let haveFirstQuote = false;
   notifier.getUpdateSince().then(_ => (haveFirstQuote = true));
@@ -82,8 +92,8 @@ export function makeOnewayPriceAuthorityKit(opts) {
      * of calcAmountTrigger
      */
     async function quoteWhenOutTrigger(amountIn, amountOutLimit) {
-      mathIn.coerce(amountIn);
-      mathOut.coerce(amountOutLimit);
+      amountMath.coerce(amountIn, actualBrandIn);
+      amountMath.coerce(amountOutLimit, actualBrandOut);
 
       /** @type {PromiseRecord<PriceQuote>} */
       const triggerPK = makePromiseKit();
@@ -98,7 +108,7 @@ export function makeOnewayPriceAuthorityKit(opts) {
             }
             const amountOut = calcAmountOut(amountIn);
 
-            if (!compareAmount(mathOut, amountOut, amountOutLimit)) {
+            if (!compareAmount(amountOut, amountOutLimit)) {
               // Don't fire the trigger yet.
               return undefined;
             }
@@ -163,7 +173,7 @@ export function makeOnewayPriceAuthorityKit(opts) {
       return notifier;
     },
     async quoteGiven(amountIn, brandOut) {
-      mathIn.coerce(amountIn);
+      amountMath.coerce(amountIn, actualBrandIn);
       assertBrands(amountIn.brand, brandOut);
 
       await notifier.getUpdateSince();
@@ -173,7 +183,7 @@ export function makeOnewayPriceAuthorityKit(opts) {
       }));
     },
     async quoteWanted(brandIn, amountOut) {
-      mathOut.coerce(amountOut);
+      amountMath.coerce(amountOut, actualBrandOut);
       assertBrands(brandIn, amountOut.brand);
 
       await notifier.getUpdateSince();
@@ -183,7 +193,7 @@ export function makeOnewayPriceAuthorityKit(opts) {
         const actualAmountOut = calcAmountOut(amountIn);
 
         assert(
-          mathOut.isGTE(actualAmountOut, amountOut),
+          amountMath.isGTE(actualAmountOut, amountOut),
           X`Calculation of ${actualAmountOut} didn't cover expected ${amountOut}`,
         );
         return { amountIn, amountOut };
@@ -191,7 +201,7 @@ export function makeOnewayPriceAuthorityKit(opts) {
     },
     async quoteAtTime(deadline, amountIn, brandOut) {
       assert.typeof(deadline, 'bigint');
-      mathIn.coerce(amountIn);
+      amountMath.coerce(amountIn, actualBrandIn);
       assertBrands(amountIn.brand, brandOut);
 
       await notifier.getUpdateSince();
