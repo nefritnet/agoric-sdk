@@ -77,6 +77,11 @@
       "# F test/unitTests/contracts/loan/test-borrow.js borrow, then addCollateral, then getLiquidationPromise",
       "# amount value: 100, expected value: 101, message",
       "loan/test-borrow.js",
+      "# intermittent SEGV?",
+      "fakePriceAuthority",
+      "# F test/unitTests/contracts/test-automaticRefund.js multiple instances of automaticRefund for the same Zoe",
+      "# bad plan: 6 still to go",
+      "contracts/test-automaticRefund.js",
       "# We use WORKER_TYPE=xs ava to run these...",
       "swingsetTests"
     ]
