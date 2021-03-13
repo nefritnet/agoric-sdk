@@ -10,7 +10,7 @@
 import { assert, details as X, q, makeAssert } from '@agoric/assert';
 import { E } from '@agoric/eventual-send';
 import { makeStore, makeWeakStore } from '@agoric/store';
-import { Far, Data } from '@agoric/marshal';
+import { Far } from '@agoric/marshal';
 
 import { makeAmountMath, MathKind } from '@agoric/ertp';
 import { makeNotifierKit, observeNotifier } from '@agoric/notifier';
@@ -148,7 +148,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
     };
 
     const makeEmptySeatKit = (exit = undefined) => {
-      const initialAllocation = Data({});
+      const initialAllocation = harden({});
       const proposal = cleanProposal(getAmountMath, harden({ exit }));
       const { notifier, updater } = makeNotifierKit();
       /** @type {PromiseRecord<ZoeSeatAdmin>} */
@@ -252,7 +252,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
               : amountToAdd;
             return [seatKeyword, newAmount];
           });
-          const newAllocation = Data({
+          const newAllocation = harden({
             ...oldAllocation,
             ...updates,
           });
@@ -291,7 +291,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
               return [seatKeyword, newAmount];
             },
           );
-          const newAllocation = Data({
+          const newAllocation = harden({
             ...oldAllocation,
             ...updates,
           });
@@ -368,7 +368,7 @@ export function buildRootObject(powers, _params, testJigSetter = undefined) {
       makeInvitation: (
         offerHandler = () => {},
         description,
-        customProperties = Data({}),
+        customProperties = harden({}),
       ) => {
         assert.typeof(
           description,
